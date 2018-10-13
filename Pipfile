@@ -6,8 +6,10 @@ name = "pypi"
 [packages]
 flask = "*"
 python-dotenv = "*"
+requests = "*"
 
 [dev-packages]
+httpie = "*"
 
 [requires]
 python_version = "3.6"
