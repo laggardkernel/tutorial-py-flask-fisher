@@ -12,4 +12,4 @@ def hello():
 
 app.add_url_rule('/hello', view_func=hello)
 
-app.run()
+app.run(host='0.0.0.0', port=81)
