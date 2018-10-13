@@ -8,8 +8,11 @@ app.config.from_object('config')
 
 @app.route('/hello')
 def hello():
-    headers = {'Content-Type': 'text/plain'}
-    r = make_response('<html></html>', 404)
+    headers = {
+        'Content-Type': 'text/plain',
+        'Location': 'https://www.bing.com/'
+    }
+    r = make_response('<html></html>', 301)
     r.headers = headers
     return r
 
