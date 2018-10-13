@@ -13,3 +13,4 @@ class Config(object):
     SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-gue55"
     # log into stdout for heroku
     LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")
+    RESULTS_PER_PAGE = 15

@@ -7,6 +7,7 @@ name = "pypi"
 flask = "*"
 python-dotenv = "*"
 requests = "*"
+wtforms = "*"
 
 [dev-packages]
 httpie = "*"

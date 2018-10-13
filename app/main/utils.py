@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import requests
+from flask import current_app
 
 
 def is_isbn_or_key(word):
@@ -34,7 +35,16 @@ class YuShuBook:
         r = HTTP.get(url)
         return r
 
-    def search_by_keyword(cls, keyword, count=15, start=0):
-        url = cls.keyword_url.format(keyword, count=count, start=start)
+    @classmethod
+    def search_by_keyword(cls, q, page=1):
+        url = cls.keyword_url.format(
+            q,
+            current_app.config["RESULTS_PER_PAGE"],
+            cls.calc_start(page)
+        )
         r = HTTP.get(url)
         return r
+
+    @staticmethod
+    def calc_start(page):
+        return (page - 1) * current_app.config["RESULTS_PER_PAGE"]
