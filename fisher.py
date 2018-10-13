@@ -12,9 +12,7 @@ def hello():
         'Content-Type': 'text/plain',
         'Location': 'https://www.bing.com/'
     }
-    r = make_response('<html></html>', 301)
-    r.headers = headers
-    return r
+    return '<html></html>', 301, headers
 
 
 # app.add_url_rule('/hello', view_func=hello)
