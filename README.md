@@ -31,3 +31,27 @@ http GET http://t.yushu.im/v2/book/isbn/9787501524044
 
 endpoint有助于反向构建URL。即函数对应的URL。
 `url_map` Map中存储URL到端点函数的关联信息，`view_functions`记录函数名到函数对象的关联信息。
+
+Python导入时，同一个模块只会被导入一次。
+
+
+## Chap 04
+Blueprint不是用于分拆route定义，而是用于分拆功能。
+
+获取查询参数：
+- `count = request.args.get('count', 15, type=int)`
+- `request.args.to_ditct()`
+
+利用Form验证查询参数，`form = SearchFrom(request.args)`。直接使用`WTForms`，继承自`Form`类。`Flask-WTF`中`FlaskForm`存在csrf_token验证。
+
+是否封装为函数不是根据代码量来判断，而是根据其功能。
+
+数据表创建方式
+- db first
+- model first
+- code first
+    - 关注业务模型的设计，而不是数据库设计。
+
+面试问题：业务逻辑应该写在MVC中哪一层？
+最好在Model模型层内。
+
