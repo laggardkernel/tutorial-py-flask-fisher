@@ -33,6 +33,7 @@ class YuShuBook:
     def search_by_isbn(cls, isbn):
         url = cls.isbn_url.format(isbn)
         r = HTTP.get(url)
+        # TODO: cache the result into db. lookup before cache.
         return r
 
     @classmethod
