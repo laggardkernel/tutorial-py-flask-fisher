@@ -34,7 +34,6 @@ endpoint有助于反向构建URL。即函数对应的URL。
 
 Python导入时，同一个模块只会被导入一次。
 
-
 ## Chap 04
 Blueprint不是用于分拆route定义，而是用于分拆功能。
 
@@ -55,3 +54,41 @@ Blueprint不是用于分拆route定义，而是用于分拆功能。
 面试问题：业务逻辑应该写在MVC中哪一层？
 最好在Model模型层内。
 
+## Chap 05
+`F12`在PyCharm中查看源代码。`Ctrl+Alt+Left`向外层跳转出来。
+
+`LocalProxy`与Flask上下文
+
+application context, request context. 上下文本质上是一个对象，分别是对于`Flask`和`Request`的封装。分别存储于源码中的`AppContext`和`RequestContext`对象中。
+
+在上下文中绑定了额外的外部参数、对象，而不是属于对象本身。
+
+使用时请求上下文对象中间接访问、获取`Flask`, `Request`相关对象。`LocalProxy`提供了其间接接触二者的能力。
+
+注：作者使用了[Process On](https://processon.com/)作流程图。
+
+在`RequestContext`对象入栈之前，会先检查`AppContext`是否为空。若其为空，先推入`AppContext`入栈。
+
+**`current_app`, `request`本地代理永远指向其对应的栈顶**。若栈顶为空，则会出现`Not Found`、`Working outside application context`错误。所以，测试代码时先推送上下文`app.app_context.push()`，因为其**未在一个请求中使用**。（离线应用、单元测试）
+- `with app.app_context():`
+
+`current_app`, `request`最终获得的是真正对象，而不是上下文对象，实际在上下文中寻找栈属性。见`globals.py`。
+
+`with`语句实现：
+- `__enter__`，返回值赋值给`as`后对象。
+- `__exit__`，释放资源，处理异常。
+- `with`语句实现了类似`try...except`释放资源。
+
+```python
+    # exc_value: 异常信息
+    # tb: traceback
+    def __exit__(self, exc_type, exc_value, tb):
+        ...
+        return True
+        # return False # 在外部再次抛出异常
+        # return None # equivalent to False
+```
+
+防御性编程？默认参数。`dict.setdefault(key, value)`
+
+建议：**看源代码分析问题**。
