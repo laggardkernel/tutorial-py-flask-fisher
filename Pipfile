@@ -8,9 +8,13 @@ flask = "*"
 python-dotenv = "*"
 requests = "*"
 wtforms = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
 
 [dev-packages]
 httpie = "*"
+ipython = "*"
+flask-shell-ipython = "*"
 
 [requires]
 python_version = "3.6"

@@ -1,7 +1,28 @@
+appnope==0.1.0 ; sys_platform == 'darwin'
+backcall==0.1.0
 certifi==2018.11.29
 chardet==3.0.4
+click==7.0
+decorator==4.3.2
+flask-shell-ipython==0.4.0
+flask==1.0.2
 httpie==1.0.2
 idna==2.8
+ipython-genutils==0.2.0
+ipython==7.2.0
+itsdangerous==1.1.0
+jedi==0.13.2
+jinja2==2.10
+markupsafe==1.1.0
+parso==0.3.3
+pexpect==4.6.0 ; sys_platform != 'win32'
+pickleshare==0.7.5
+prompt-toolkit==2.0.8
+ptyprocess==0.6.0
 pygments==2.3.1
 requests==2.21.0
+six==1.12.0
+traitlets==4.3.2
 urllib3==1.24.1
+wcwidth==0.1.7
+werkzeug==0.14.1
