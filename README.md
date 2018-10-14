@@ -32,6 +32,8 @@ http GET http://t.yushu.im/v2/book/isbn/9787501524044
 endpoint有助于反向构建URL。即函数对应的URL。
 `url_map` Map中存储URL到端点函数的关联信息，`view_functions`记录函数名到函数对象的关联信息。
 
+![img/0301.jpg](../assets/img/0301.jpg?raw=true)
+
 Python导入时，同一个模块只会被导入一次。
 
 ## Chap 04
@@ -66,6 +68,8 @@ application context, request context. 上下文本质上是一个对象，分别
 使用时请求上下文对象中间接访问、获取`Flask`, `Request`相关对象。`LocalProxy`提供了其间接接触二者的能力。
 
 注：作者使用了[Process On](https://processon.com/)作流程图。
+
+![img/0501.jpg](../assets/img/0501.jpg?raw=true)
 
 在`RequestContext`对象入栈之前，会先检查`AppContext`是否为空。若其为空，先推入`AppContext`入栈。
 
