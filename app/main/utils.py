@@ -38,9 +38,7 @@ class YuShuBook:
     @classmethod
     def search_by_keyword(cls, q, page=1):
         url = cls.keyword_url.format(
-            q,
-            current_app.config["RESULTS_PER_PAGE"],
-            cls.calc_start(page)
+            q, current_app.config["RESULTS_PER_PAGE"], cls.calc_start(page)
         )
         r = HTTP.get(url)
         return r

@@ -36,7 +36,7 @@ endpoint有助于反向构建URL。即函数对应的URL。
 
 Python导入时，同一个模块只会被导入一次。
 
-## Chap 04
+## Chap 4
 Blueprint不是用于分拆route定义，而是用于分拆功能。
 
 获取查询参数：
@@ -56,7 +56,7 @@ Blueprint不是用于分拆route定义，而是用于分拆功能。
 面试问题：业务逻辑应该写在MVC中哪一层？
 最好在Model模型层内。
 
-## Chap 05
+## Chap 5
 `F12`在PyCharm中查看源代码。`Ctrl+Alt+Left`向外层跳转出来。
 
 `LocalProxy`与Flask上下文
@@ -96,3 +96,74 @@ application context, request context. 上下文本质上是一个对象，分别
 防御性编程？默认参数。`dict.setdefault(key, value)`
 
 建议：**看源代码分析问题**。
+
+## Chap 6: Flask中的多线程与线程隔离技术
+进程
+计算机资源时稀缺的，应用竞争操作系统的资源。进程是计算机竞争计算机资源的基本单位。
+
+进程调度：在不同应用程序进程之间切换。（参考书籍：《操作系统原理》相关书籍）
+进程调度对于系统开销时非常大的，保存、恢复相关上下文耗时。
+
+线程
+线程是进程的一部分。进程管理资源粒度太大，引入更小的CPU资源。线程切换时开销相对进程小。
+进程分配资源，线程利用CPU执行代码。线程本身不能管理或拥有资源，但可访问进程的资源。（Python不是有全局线程锁吗？）
+
+多线程
+主线程启动子线程，线程默认不是顺序执行。多线程编程更加充分地应用CPU的性能优势，防止阻断执行。多线程编程也是异步编程的一种形态。
+
+作者的话：不要盲目崇拜异步编程，异步编程的管理、维护、调试成本是非常的大。同步解决不了的问题再换异步编程。
+
+Python全局解释器锁GIL，导致Python多线程最多可以利用一个核。
+多个线程共享进程的资源，从而存在线程不安全。锁，锁定资源仅当前线程所用。
+细粒度的锁，主动在程序中加锁。粗粒度锁，在Python解释器上加锁，即GIL。Python解释器上只允许占用CPU。
+
+GIL只在一定程度上保证了线程安全，因为程序执行存在更小单位bytecode。GIL全局解释器锁只存在于CPython解释器。
+
+多进程管理的资源之间互相不能访问，共享变量需要设计进程通信技术。且进程之间切换成本较线程切换大。
+
+对IO密集型，单CPU多线程也是有意义的。
+常见IO操作：数据库查询、网络资源请求、文档读写。
+- Web应用查询瓶颈更多时候还是在数据库查询上。
+- 主要时间用于等待。多线程可以削减等待时间。
+- NodeJS也是只适用于IO密集型程序。
+
+Flask多线程
+Flask多线程是由webserver开启的。Flask存在内置webserver，默认启动单进程单线程模式。
+
+```python
+app.run(..., threaded=True)
+# flask run --with-threads
+```
+
+**注**：
+- 根据查询[Builtin Configuration Values](http://flask.pocoo.org/docs/1.0/config/#builtin-configuration-values)，不存在`threaded=True`对应的环境变量。
+- PyCharm新版可以调试多线程，Frame中。
+
+客户端请求与处理请求的线程
+每个请求信息存储在`Request`实例中，多线程时需要一种方案，利用`request`对应不同请求`Request`实例。
+
+线程隔离
+- dict，多线程唯一标识（线程ID）作为字典键。
+
+作者的话：框架复杂不在于原理，而在于其要考虑全面。
+
+`werkzeug.local`模块下`Local`对象，利用字典实现线程隔离，以线程ID作为键。（不是有`threading.local()`吗？）
+
+`_request_ctx_stack`, `_app_ctx_stack`均为`werkzeug`中`LocalStack`实例，基于`werkzeug.local.Local`封装实现的站结构。
+
+作者的话：多次封装。
+
+`LocalStack`使用，`.push()`, `.pop()`, `.top`。（`werkzueg.local.LocalStack`）
+
+
+使用线程隔离的意义在于：使当前线程正确引用到他自己所创建的对象，而不是引用到其他线程所创建的对象。（MD这章这么多废话，就是为了将这玩意儿？这不废话嘛。主要还是为了把请求等相关对象绑定在线程隔离对象上作为属性，也变成隔离：**被线程隔离的对象**）
+
+`setattr()`, `getattr()`.
+
+`app` Flask核心对象只有一个。`current_app`不能成为线程隔离对象。
+- `app`绑定数据可以作为全局，但是存在线程安全问题。
+
+总结：
+- `werkzeug.local.Local`是以线程ID作为字典键实现，`werkzeug.local.LocalStack`是基于`Local`实现的栈类。
+- `AppContext`, `RequestContext`上下文类基于`LocalStack`类实现。`Flask`实例/核心对象作为`AppContext`实例属性被保存。`Request`实例被作为`RequestContext`实例属性保存。
+- `current_app`指向栈顶`AppContext.top.app`，即`Flask`核心对象，`request`指向`RequestContext.top.request`属性，`Request`实例。
