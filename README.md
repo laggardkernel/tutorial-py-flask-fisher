@@ -175,7 +175,7 @@ app.run(..., threaded=True)
 - `AppContext`, `RequestContext`上下文类基于`LocalStack`类实现。`Flask`实例/核心对象作为`AppContext`实例属性被保存。`Request`实例被作为`RequestContext`实例属性保存。
 - `current_app`指向栈顶`AppContext.top.app`，即`Flask`核心对象，`request`指向`RequestContext.top.request`属性，`Request`实例。
 
-## Chap 7
+## Chap 7: 书籍详情页面的构建
 页面需求可能和原始数据不对应，`ViewModel`对原始数据进行转换：
 - 裁剪
 - 修饰
@@ -211,3 +211,75 @@ app.run(..., threaded=True)
 - 渲染，前者在客户端，后者在服务端
 - 业务逻辑/渲染，前者交由JavaScript，后者交由视图函数
     - 前端框架AngularJS、Vue就具备前端业务能力：数据填充、模板渲染能力
+
+## Chap 8: Jinja2模板语言
+本章节过于基础，配不上高级编程的课程名字。
+
+### 静态文件
+静态文件默认设置，静态文件夹位于应用根目录下`static/`文件夹，应用程序根目录基于`Flask(__name__)`。查看`_get_static_url_path`函数可知，URL取路径最后一部分。
+
+```python
+app = Flask(__name__, static_folder='')
+# static_url_path='' 指定静态文件夹URL值
+```
+
+静态文件同样有2个层级：应用程序级别的静态文件，和蓝图层级的静态文件。（蓝图`Blueprint`类相关方法基本复制了Flask API）
+
+```
+web = Blueprint('web', __name__, static_foler='', static_url_path='')
+```
+
+`send_static_file()`函数负责读取返回静态文件。可以**包装`send_static_file()`做积分限制下载文件。**
+
+### 模板渲染
+```python
+render_template('template_name', key1=value1, key2=value2)
+
+context = {
+    'key1': value1,
+    'key2': value2
+}
+render_template('template_name', **context)
+```
+
+指定模板文件夹位置，分离模板到蓝图。
+
+```python
+app = Flask(__name__, template_folder='')
+web = Blueprint('web', __name__, template_folder='')
+```
+
+作者建议：
+- 模板文件夹可以分离，静态文件夹推荐只使用应用级别一个文件夹，因为通常静态文件会被各个蓝图共享使用。
+- 模板未找到的错误提示较常见，不必在意。解决方案是，**在Pycharm标记对应文件夹为`templates`文件夹**。
+
+### 模板语言
+Pycharm中模板语言可以设置。
+
+Jinja2 文档中重点学习**Template Designer Documentation**.
+
+这部分太基础，本人已经读过[Jinja2文档](http://jinja.pocoo.org/docs/2.10/)，此节可以略过。
+
+过滤器：
+- `default('value')`
+- `length()`
+
+反向解析URL
+- `url_for`通过endpoint机制反向构建URL
+- `{{ url_for('static', filename='custom.css') }}`
+
+`flash('message', category='message')`
+- 分类：`error`，`warning`
+
+```html
+{% set messages = get_flashed_messages() %}
+{% for message in messages %}
+
+{% endfor %}
+
+{% set messages = get_flashed_messages(category_filter=['error','warning']) %}
+```
+
+Flask中的session会话是存储在客户端的。
+
+模板语言中`set`和`with`区别在于，`with`有显示作用域限制，`set`使用默认作用域范围——一个模板块内。
