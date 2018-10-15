@@ -382,11 +382,10 @@ modules.xml
 .idea/misc.xml
 *.ipr
 
-
 ### Custom ###
 .envrc
 *.db
+.vscode/
 
-
-3 rotating logs
+# rotating logs
 *.log.?
