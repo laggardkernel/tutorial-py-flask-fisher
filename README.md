@@ -167,3 +167,37 @@ app.run(..., threaded=True)
 - `werkzeug.local.Local`是以线程ID作为字典键实现，`werkzeug.local.LocalStack`是基于`Local`实现的栈类。
 - `AppContext`, `RequestContext`上下文类基于`LocalStack`类实现。`Flask`实例/核心对象作为`AppContext`实例属性被保存。`Request`实例被作为`RequestContext`实例属性保存。
 - `current_app`指向栈顶`AppContext.top.app`，即`Flask`核心对象，`request`指向`RequestContext.top.request`属性，`Request`实例。
+
+## Chap 7
+页面需求可能和原始数据不对应，`ViewModel`对原始数据进行转换：
+- 裁剪
+- 修饰
+- 合并
+
+![img/0701.jpg](../assets/img/0701.jpg?raw=true)
+
+作者建议：要不要处理列表为字符串？前后端分离可以直接交给前端，模板渲染建议直接转换好。
+
+对单项数据编写处理函数，对于多项数据（列表）**复用**单项数据处理函数。
+
+一个类应该具有描述特征（类变量、实例变量）和行为（方法）两部分，只有后面的方法而没有变量，其实还是在面向过程（伪面向对象）。
+
+`__dict__`函数返回对象的字典。
+
+![img/0702.jpg](../assets/img/0702.jpg?raw=true)
+
+函数式编程思维，将代码解释权交给调用方。`json.dumps(books, default=lambda o:o.__dict__)`。
+
+作者建议：团队合作时，不要过于关注页面，而关注视图函数的返回，不管是API而是网站。
+
+返回数据中
+- Javascript、 CSS、图片属于静态文件，因其不需要被填充，不需要加工。
+- 普通网站页面渲染由服务器
+- 单页面网站，数据渲染交给客户端，由JavaScript实现
+
+![img/0703.jpg](../assets/img/0703.jpg?raw=true)
+
+问题：单页面和多页面网站的主要区别？
+- 渲染，前者在客户端，后者在服务端
+- 业务逻辑/渲染，前者交由JavaScript，后者交由视图函数
+    - 前端框架AngularJS、Vue就具备前端业务能力：数据填充、模板渲染能力
