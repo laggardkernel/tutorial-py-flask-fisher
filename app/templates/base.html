@@ -35,25 +35,25 @@
       <div class="row">
         <div class="col-md-2 col-md-offset-1">
           <a id="recent" href="{{ url_for('web.index') }}" class="flex-vertical-hor-center">
-            <img src="{{ url_for('static', filename='images/upload.png') }}" alt="封面"/>
+            <img src="{{ url_for('static', filename='images/upload.png') }}" alt=""/>
             <span>最近上传</span>
           </a>
         </div>
         <div class="col-md-2">
           <a id="gifts" href="{{ url_for('web.my_gifts') }}" class="flex-vertical-hor-center">
-            <img src="{{ url_for('static', filename='images/gift.png') }}" alt="封面"/>
+            <img src="{{ url_for('static', filename='images/gift.png') }}" alt=""/>
             <span>赠送清单</span>
           </a>
         </div>
         <div class="col-md-2">
           <a id="wishes" href="{{ url_for('web.my_wish') }}" class="flex-vertical-hor-center">
-            <img src="{{ url_for('static', filename='images/wish.png') }}" alt="封面"/>
+            <img src="{{ url_for('static', filename='images/wish.png') }}" alt=""/>
             <span>心愿清单</span>
           </a>
         </div>
         <div class="col-md-2">
           <a id="pending" href="{{ url_for('web.pending') }}" class="flex-vertical-hor-center">
-            <img src="{{ url_for('static', filename='images/fish.png') }}" alt="封面"/>
+            <img src="{{ url_for('static', filename='images/fish.png') }}" alt=""/>
             <span>鱼漂</span>
           </a>
         </div>
@@ -61,15 +61,15 @@
     </div>
   </div>
   <div class="container-height flex-vertical-center float-menu">
-    {#    {% if not current_user.is_authenticated %}#}
-    {#      <div style="float:right">#}
-    {#        <a href="{{ url_for('web.login') }}">登录</a>#}
-    {#        <a style="margin-left: 40px;" href="{{ url_for('web.register') }}">注册</a>#}
-    {#      </div>#}
-    {#    {% else %}#}
-    {#      <a href="{{ url_for('web.personal_center') }}">{{ current_user.nickname }}的鱼书</a>#}
-    {#      <a style="margin-left: 40px;" href="{{ url_for('web.logout') }}">注销</a>#}
-    {#    {% endif %}#}
+    {# {% if not current_user.is_authenticated %}#}
+    {#   <div style="float:right">#}
+    {#     <a href="{{ url_for('web.login') }}">登录</a>#}
+    {#     <a style="margin-left: 40px;" href="{{ url_for('web.register') }}">注册</a>#}
+    {#   </div>#}
+    {# {% else %}#}
+    {#   <a href="{{ url_for('web.personal_center') }}">{{ current_user.nickname }}的鱼书</a>#}
+    {#   <a style="margin-left: 40px;" href="{{ url_for('web.logout') }}">注销</a>#}
+    {# {% endif %}#}
   </div>
 {% endblock %}
 <div class='container'>

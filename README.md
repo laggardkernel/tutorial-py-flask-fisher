@@ -6,6 +6,13 @@
 
 本教程使用作者所提供API，学习完后有必要改为豆瓣API，二者格式基本兼容。
 
+个人评价：
+- 的确讲了些Flask底层实现，但是并不是带你逐行读代码。重点在于Python高级应用和Flask原理知识。
+- 关于线程隔离部分废话太多，把`1+1`都讲一遍，有必要吗？
+- Jinja2模板语言讲解的受众是完全没有用过Jinja2的新手，这种基础知识不应该放到高级课程里面来
+    - 过滤器也被称作高级使用技巧？！
+- 总结：勉强算是高级课程
+
 ## Chap 3
 API测试
 
@@ -181,12 +188,15 @@ app.run(..., threaded=True)
 对单项数据编写处理函数，对于多项数据（列表）**复用**单项数据处理函数。
 
 一个类应该具有描述特征（类变量、实例变量）和行为（方法）两部分，只有后面的方法而没有变量，其实还是在面向过程（伪面向对象）。
+- 一个类中大量staticmethod或者classmethod，可能此类就是面向过程
 
 `__dict__`函数返回对象的字典。
 
 ![img/0702.jpg](../assets/img/0702.jpg?raw=true)
 
 函数式编程思维，将代码解释权交给调用方。`json.dumps(books, default=lambda o:o.__dict__)`。
+
+> If specified, *default* should be a function that gets called for objects that can’t otherwise be serialized. It should return a JSON encodable version of the object or raise a `TypeError`. If not specified, `TypeError` is raised. 即`default`在对象不能被序列化时调用，作为别用序列化方案。
 
 作者建议：团队合作时，不要过于关注页面，而关注视图函数的返回，不管是API而是网站。
 
