@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import json
-from flask import jsonify, request
+from flask import flash, jsonify, request, render_template
 from . import bp
 from .forms import SearchFrom
 from .utils import is_isbn_or_key, YuShuBook
@@ -29,6 +29,34 @@ def search():
 
         books.fill(yushu_book, q)
         # return jsonify(books)
-        return json.dumps(books, default=lambda o: o.__dict__)
+        # return json.dumps(books, default=lambda o: o.__dict__)
     else:
-        return jsonify(form.errors)
+        # return jsonify(form.errors)
+        flash("搜索的关键字不符合要求，请重新输入关键字")
+    # return render_template()
+    return render_template("search_result.html", books=books)
+
+
+@bp.route("/book/<isbn>/detail")
+def book_detail(isbn):
+    pass
+
+
+@bp.route("/index")
+def index():
+    pass
+
+
+@bp.route("/gifts")
+def my_gifts():
+    pass
+
+
+@bp.route("/wish")
+def my_wish():
+    pass
+
+
+@bp.route("/pending")
+def pending():
+    pass
