@@ -60,3 +60,8 @@ class YuShuBook:
 
     def calc_start(self, page):
         return (page - 1) * current_app.config["RESULTS_PER_PAGE"]
+
+    @property
+    def first(self):
+        # handle exception in first property
+        return self.books[0] if self.total >= 1 else None

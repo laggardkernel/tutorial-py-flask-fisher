@@ -37,9 +37,12 @@ def search():
     return render_template("search_result.html", books=books)
 
 
-@bp.route("/book/<isbn>/detail")
+@bp.route("/book/<isbn>")
 def book_detail(isbn):
-    pass
+    yushu_book = YuShuBook()
+    yushu_book.search_by_isbn(isbn)
+    book = BookViewModel(yushu_book.first)
+    return render_template("book_detail.html", book=book, wishes=[], gifts=[])
 
 
 @bp.route("/index")
@@ -59,4 +62,19 @@ def my_wish():
 
 @bp.route("/pending")
 def pending():
+    pass
+
+
+@bp.route("/save-to-wish")
+def save_to_wish():
+    pass
+
+
+@bp.route("/send-drift")
+def send_drift():
+    pass
+
+
+@bp.route("/satisfy-wish")
+def satisfy_wish():
     pass

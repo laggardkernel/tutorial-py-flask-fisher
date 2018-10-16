@@ -85,6 +85,7 @@
       <p class="description-font">{{ book.summary }}</p>
     </div>
   </div>
+  {# show donators by default #}
   {% if gifts.total!= 0 and not has_in_gifts %}
     <div style="margin-top:30px;" class="row">
       <div class="col-md-3">
@@ -135,8 +136,7 @@
   <div class="remodal" data-remodal-id="modal" role="dialog"
        aria-labelledby="modal1Title" aria-describedby="modal1Desc"
        data-remodal-options="closeOnOutsideClick: false">
-    <button data-remodal-action="close" class="remodal-close"
-            aria-label="Close"></button>
+    <button data-remodal-action="close" class="remodal-close" aria-label="Close"></button>
     <div>
       <h5 class="diag-title"> 您确定拥有《{{ book.title }}》这本书吗？</h5>
       <p id="modal1Desc" class="description-font">
