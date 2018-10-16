@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 {% endblock %}
 {% block navbar %}
 {% endblock %}
@@ -16,10 +16,10 @@
         </div>
         <div class="row">
           <div class="col-md-8 col-md-offset-2 flex-vertical personal-detail">
-            <form action="{{ url_for('web.register') }}" method="post">
-              <input style="width:100%" id="nickname" name="nickname"
+            <form action="{{ url_for('auth.register') }}" method="post">
+              <input style="width:100%" id="name" name="name"
                      type="text" placeholder="昵称" class="none-input"
-                     value="{{ form.data['nickname'] | default('',true) }}">
+                     value="{{ form.data['name'] | default('',true) }}">
               <input style="width:100%" id="email" name="email" type="text"
                      placeholder="邮箱" class="none-input"
                      value="{{ form.data['email'] | default('',true) }}">
@@ -33,7 +33,7 @@
         <div style="margin-top:30px;" class="row">
           <div class="col-md-8 text-center col-md-offset-2">
             <span class="description-font">已有账号？</span>
-            <a href="{{ url_for('web.login') }}">登录</a>
+            <a href="{{ url_for('auth.login') }}">登录</a>
           </div>
         </div>
       </div>

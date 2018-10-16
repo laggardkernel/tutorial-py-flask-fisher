@@ -24,7 +24,7 @@ class Auth {
                 }
                 else {
                     if (msg.code == 10081) {
-                        self.that.reflectToView('#nickname', msg.msg)
+                        self.that.reflectToView('#name', msg.msg)
                     }
                     else {
                         alert('服务器内部错误')

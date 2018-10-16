@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 from flask import flash, jsonify, request, render_template
+from flask_login import login_required
 from . import bp
 from .forms import SearchFrom
 from .utils import is_isbn_or_key, YuShuBook
@@ -51,6 +52,7 @@ def index():
 
 
 @bp.route("/gifts")
+@login_required
 def my_gifts():
     pass
 

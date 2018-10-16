@@ -17,14 +17,14 @@
         <div class="row">
           <div class="col-md-12 text-center bg-head">
             <span class="drift-title">
-              向<span class="space">{{ gifter.nickname }}</span>请求这本书
+              向<span class="space">{{ gifter.name }}</span>请求这本书
             </span>
           </div>
         </div>
         <div style="margin-top:15px;" class="row">
           <div class="col-md-10 col-md-offset-1 flex-vertical gifter-container">
             <span class="sub-title-color">以下是书籍拥有者信息，诚信度供你参考:</span>
-            <span style="margin-top:10px; margin-bottom:10px;">{{ gifter.nickname }}</span>
+            <span style="margin-top:10px; margin-bottom:10px;">{{ gifter.name }}</span>
             <div>
               <span class="description-font">鱼豆：</span><span>{{ gifter.beans }}</span>
             </div>
@@ -76,7 +76,7 @@
               <input style="margin-top:12px;" type="submit"
                      class="btn btn-big btn-block" value="提交">
               <span style="margin-top:15px;"
-                    class="main-color">提交信息，等待{{ gifter.nickname }}将书籍邮寄给你</span>
+                    class="main-color">提交信息，等待{{ gifter.name }}将书籍邮寄给你</span>
             </div>
           </div>
         </form>

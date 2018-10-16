@@ -10,6 +10,7 @@ requests = "*"
 wtforms = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
+flask-login = "*"
 
 [dev-packages]
 httpie = "*"

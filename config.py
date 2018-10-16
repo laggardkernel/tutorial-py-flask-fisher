@@ -18,3 +18,5 @@ class Config(object):
     # log into stdout for heroku
     LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")
     RESULTS_PER_PAGE = 15
+
+    BEANS_UPLOAD_PER_BOOK = 0.5

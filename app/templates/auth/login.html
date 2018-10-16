@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 {% endblock %}
 {% block navbar %}
 {% endblock %}
@@ -29,9 +29,14 @@
                 <input id="password" name="password" placeholder="密码"
                        class="none-input" type="password">
                 <a id="forget-password" class="description-font"
-                   href="{{ url_for('web.forget_password_request') }}">
+                   href="{{ url_for('auth.password_reset_request') }}">
                   忘记密码?
                 </a>
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="remember_me"> 记住我
+                </label>
               </div>
               <input style="margin-top:15px;" id="btn-submit" type="submit"
                      class="btn btn-big btn-block" value="登录">
@@ -41,7 +46,7 @@
         <div style="margin-top:30px;" class="row">
           <div class="col-md-8 text-center col-md-offset-2">
             <span class="description-font">没有账号？</span>
-            <a href="{{ url_for('web.register') }}">注册</a>
+            <a href="{{ url_for('auth.register') }}">注册</a>
           </div>
         </div>
       </div>
