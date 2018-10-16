@@ -283,3 +283,115 @@ Jinja2 文档中重点学习**Template Designer Documentation**.
 Flask中的session会话是存储在客户端的。
 
 模板语言中`set`和`with`区别在于，`with`有显示作用域限制，`set`使用默认作用域范围——一个模板块内。
+
+## Chap 9: 用户登录与注册
+Jinja2过滤器`default(value, default_value=u'', boolean=False)`
+- `boolean=True`参数使得在求值为False时也使用默认值。
+
+在模板语言中拼接字段较为复杂，因为存在字段为空判断的问题。模板中拼接字段可以放到view_models中。
+
+```html
+<span>{{ [book.author | d(''), book.publisher | d('', true) , '￥' + book.price | d('')] | join(' / ') }}</span>
+```
+
+
+```python
+class BookViewModel(object):
+   # ...
+
+    @property
+    def intro(self):
+        intro = filter(
+            lambda x: True if x else False, [self.author, self.publisher, self.price]
+        )
+        return " / ".join(intro)
+```
+
+书籍详情页面，赠送、请求书籍业务逻辑。
+
+![img/0901.jpg](../assets/img/0901.jpg?raw=true)
+
+
+利用抽象基类定义一些共有属性，如激活状态表示软删除。
+
+```python
+class Base(db.Model):
+    __abstract__ = True # No table creation
+    # soft deletion
+    status = db.Column(db.SmallInteger, default=1)
+```
+
+动态赋值
+
+```python
+    def set_attrs(self, attrs_dict):
+        for key, value in attrs_dict.items():
+            if hasattr(self, key) and key not in ["id"]:
+                setattr(self, key, value)
+```
+
+`@property`设置只写属性password（这TMD不是常识吗？）
+
+```python
+    password_hash = db.Column("password", db.String(128))
+
+    @property
+    def password(self):
+        raise AttributeError("password is a write-only attribute!")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+```
+
+cookie更多地应用于精准广告投放。默认机制是，网站拿到自己网站相关cookie.
+- TODO: 了解跨网站cookie共享
+
+![img/0902.jpg](../assets/img/0902.jpg?raw=true)
+
+[Flask-Login](https://flask-login.readthedocs.io/en/latest/)
+- 写入用户票据，写入用户ID
+- `get_id`等类用户函数定义可以通过直接继承`UserMixin`省去继承的麻烦。
+- `login_manager.user_loader`返回用户
+- `login_rewquired`装饰器限制权限
+
+中间Flask-Login使用介绍全是废话，这不就是其Document基本内容吗。
+
+flask-login 模块结构
+
+![img/0903.jpg](../assets/img/0903.jpg?raw=true)
+
+
+非法重定向：如登录后重定向至钓鱼网站。
+
+疑难：`hasattr(user, 'password')` returns `False`. `hasattr(User, 'password')`, `hasattr(user, 'password')`表现不同。
+
+参考
+- [hasattr实现调用getattr](https://stackoverflow.com/questions/30143957/why-does-hasattr-execute-the-property-decorator-code-block/55118101#55118101)
+- [Why does hasattr behave differently on classes and instances with @property method?](https://stackoverflow.com/questions/55118728/why-does-hasattr-behave-differently-on-classes-and-instances-with-property-meth)
+
+目前看来，实例（仅限实例）调用`getattr`会先调用`hasattr`，由于此时会执行`property`方法，只写属性方法抛出异常。在类上调用`getattr`实际只会判断类有没有此方法，而不必去执行此方法，故不会抛出异常，返回属性对象。可以使用`.__class__`使二者表现一致。
+
+```python
+class User(Base, UserMixin):
+    @property
+    def password(self):
+        raise AttributeError("password is a read-only attribute!")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+hasattr(User, 'password')
+# True
+
+u1=User()
+hasattr(u1, 'password')
+# False
+```
