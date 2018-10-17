@@ -17,11 +17,11 @@
       </div>
       <div class="description-font-margin">
         <div>
-          <span>作者:</span>
+          <span>作者：</span>
           <span>{{ book.author }}</span>
         </div>
         <div>
-          <span>出版社:</span>
+          <span>出版社：</span>
           <span>{{ book.publisher }}</span>
         </div>
         <div>
@@ -54,7 +54,7 @@
     </div>
   </div>
   <div style="margin-top:30px;" class="row">
-    {% if not has_in_gifts and not has_in_wishes %}
+    {% if not in_gift_list and not in_wish_list %}
       <div class="col-md-1">
         <a class="btn btn-outline" href="#modal">
           赠送此书
@@ -65,7 +65,7 @@
           加入到心愿清单
         </a>
       </div>
-    {% elif has_in_wishes %}
+    {% elif in_wish_list %}
       <div class="col-md-3">
         <span class="bg-info">已添加至心愿清单</span>
       </div>
@@ -86,17 +86,17 @@
     </div>
   </div>
   {# show donators by default #}
-  {% if gifts.total!= 0 and not has_in_gifts %}
+  {% if gifts.total!= 0 and not in_gift_list %}
     <div style="margin-top:30px;" class="row">
       <div class="col-md-3">
         <span class="description-title">向他们请求此书</span>
       </div>
     </div>
     <hr style="margin-top:5px;"/>
-    {% for gift in gifts.trades %}
+    {% for gift in gifts.transactions %}
       <div style="margin-top:30px;" class="row">
         <div class="col-md-1">
-          {{ gift.user_name }}
+          {{ gift.username }}
         </div>
         <div class="col-md-2 description-font">
           上传于{{ gift.time }}
@@ -109,17 +109,17 @@
       </div>
     {% endfor %}
   {% endif %}
-  {% if wishes.total != 0 and has_in_gifts %}
+  {% if wishes.total != 0 and in_gift_list %}
     <div style="margin-top:30px;" class="row">
       <div class="col-md-3">
         <span class="description-title">向他们赠送此书</span>
       </div>
     </div>
     <hr style="margin-top:5px;"/>
-    {% for wish in wishes.trades %}
+    {% for wish in wishes.transactions %}
       <div style="margin-top:30px;" class="row">
         <div class="col-md-1">
-          {{ wish.user_name }}
+          {{ wish.username }}
         </div>
         <div class="col-md-2 description-font">
           上传于{{ wish.time }}

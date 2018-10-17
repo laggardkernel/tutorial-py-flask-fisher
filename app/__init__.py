@@ -4,12 +4,35 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from contextlib import contextmanager
+from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy, BaseQuery
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from config import Config
 
-db = SQLAlchemy()
+
+class SQLAlchemy(_SQLAlchemy):
+    @contextmanager
+    def auto_commit(self):
+        try:
+            # jump out and execute db statements, which is equivalent to
+            # running db statements under current context
+            yield
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            raise e
+
+
+class Query(BaseQuery):
+    def filter_by(self, **kwargs):
+        if "status" not in kwargs:
+            kwargs["status"] = 1
+        return super().filter_by(**kwargs)
+
+
+db = SQLAlchemy(query_class=Query)
+
 migrate = Migrate()
 login_manager = LoginManager()
 login_manager.session_protection = "strong"  # delete non-fresh session

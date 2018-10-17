@@ -13,6 +13,7 @@ def is_safe_url(target):
 
 
 def get_redirect_target():
+    # the next url may be stored in Header "Referer" as well
     for target in request.values.get("next"), request.referrer:
         if not target:
             continue
