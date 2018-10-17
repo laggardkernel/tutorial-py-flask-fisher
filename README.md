@@ -395,3 +395,86 @@ u1=User()
 hasattr(u1, 'password')
 # False
 ```
+
+## Chap 10: 书籍交易模型
+事务
+- `db.session.commit()`, `db.session.rollback()`
+- `contextmanager`装饰器免去`__enter__`, `__exit__`类方法定义
+
+```python
+try:
+    # db operations
+    db.session.commit()
+except Exception as e:
+    db.session.rollback()
+    raise e
+```
+
+```python
+class MyResource:
+    def query(self):
+        print('query data')
+
+from contextlib import contextmanager
+
+@contextmanager
+def make_myresourse():
+    print('connect to resource') # equivalent to __enter__
+    yield MyResource() # 中断
+    print('close resource connection') # equivalent to __exit__
+
+with make_myresource() as r:
+    r.query()
+```
+
+作者：实际上`contextmanager`可能反而复杂了原有写法（并非简化了原有的定义）。但其优势是不需要操作原有类（引用的库）。
+
+Tips:
+- 学习知识本身时，独立文件做示例
+- 高级编程并不是指学习高级语法，而是运用其写出好的代码（知识综合应用）
+- 写不出高级代码很正常，多模仿，多看优秀框架源码
+
+数据库记录条目创建时间，类构造函数赋当前时间。（为嘛不用`default`）
+此处作者使用**错误**，`default`赋值函数名`datatime.utcnow`, 而不是执行函数返回其结果。
+
+Ajax
+- 避免重定向回到当前页面
+- 减少不必要的渲染，从而改善服务器性能
+
+![img/1001.jpg](../assets/img/1001.jpg?raw=true)
+
+最消耗页面性能的部分在于**模板渲染**。解决方案：缓存为静态页面。
+
+MVC v.s. MVT
+- Model, View, Controller
+- Model, Template,
+
+**业务逻辑**应该写在`MVC`中Model层，即作为模型层方法。模型层和数据层（ORM已经涵盖了数据层）。另外，数据层还可以进一步分层，如分为服务Service层和逻辑Logic层。但实际中，控制层也会写业务逻辑。模型层不等价于数据层，ORM已经完成了数据层统一接口封装。
+
+**重写基类实现自定义业务逻辑**
+
+查询时，注意查询数据状态，如是否被软删除。自定义`filter_by`，默认只查询非软删除数据。
+
+先搞清继承关系：`query`对象`BaseQuery`(flask-sqlalchemy), 继承自`orm.Query`, sqlalchemy `Query`下`filter_by`方法。自定义`Query`类继承`BaseQuery`，重写`filter_by`逻辑。
+
+```python
+class Query(BaseQuery):
+    def filter_by(self, **kwargs):
+        if 'status' not in kwargs.keys():
+            kwargs['status'] = 1
+        # 是否返回对象，查看父类中方法
+        return super().filter_by(**kwargs)
+
+db = SQLAlchemy(query_class=Query)
+```
+
+再查询`SQLAlchemy`源码，发现`flask_sqlalchemy/__init__.py`中`__init__`构造函数可以传参`query_class`.
+
+Datetime 字符串转换为 datetime类型，吃饱撑的？直接定义模型时使用`db.Datetime`不就完了。
+
+## 教程错误总结
+Model中`default`参数使用错误，记录默认时间传递函数对象，即不带括号执行函数。
+
+时间记录、显示没有考虑时区，解决方法：`datetime.utcnow()`， `Flask-Moment`应用。
+
+数据类型转换，教程中使用ViewModel自定义类型转换。生产中已经有较好的解决方案[marshmallow: simplified object serialization](https://marshmallow.readthedocs.io/en/latest/index.html)
