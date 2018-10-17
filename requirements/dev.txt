@@ -1,28 +1,28 @@
-appnope==0.1.0 ; sys_platform == 'darwin'
+appnope==0.1.0; sys_platform == 'darwin'
 backcall==0.1.0
-certifi==2018.11.29
+certifi==2019.6.16
 chardet==3.0.4
 click==7.0
-decorator==4.3.2
-flask-shell-ipython==0.4.0
-flask==1.0.2
+decorator==4.4.0
+flask-shell-ipython==0.4.1
+flask==1.1.1
 httpie==1.0.2
 idna==2.8
 ipython-genutils==0.2.0
-ipython==7.2.0
+ipython==7.7.0
 itsdangerous==1.1.0
-jedi==0.13.2
-jinja2==2.10
-markupsafe==1.1.0
-parso==0.3.3
-pexpect==4.6.0 ; sys_platform != 'win32'
+jedi==0.14.1
+jinja2==2.10.1
+markupsafe==1.1.1
+parso==0.5.1
+pexpect==4.7.0; sys_platform != 'win32'
 pickleshare==0.7.5
-prompt-toolkit==2.0.8
+prompt-toolkit==2.0.9
 ptyprocess==0.6.0
-pygments==2.3.1
-requests==2.21.0
+pygments==2.4.2
+requests==2.22.0
 six==1.12.0
 traitlets==4.3.2
-urllib3==1.24.1
+urllib3==1.25.3
 wcwidth==0.1.7
-werkzeug==0.14.1
+werkzeug==0.15.5

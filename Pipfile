@@ -11,6 +11,7 @@ wtforms = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-login = "*"
+pymysql = {extras = ["rsa"],version = "*"}
 
 [dev-packages]
 httpie = "*"
