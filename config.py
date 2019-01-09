@@ -22,3 +22,4 @@ class Config(object):
     RESULTS_PER_PAGE = 15
 
     BEANS_UPLOAD_PER_BOOK = 0.5
+    BOOK_RECENT_COUNT = 30

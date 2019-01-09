@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
 
 class BookViewModel(object):
     def __init__(self, book):
@@ -51,3 +53,28 @@ class Transaction(object):
             time=single.created_time,
             id=single.id,
         )
+
+
+MyGift = namedtuple("MyGift", ["id", "book", "count"])
+
+
+class MyGifts(object):
+    def __init__(self, gift_list, wish_count_list):
+        self.gifts = []
+        self.__gift_list = gift_list
+        self.__wish_count_list = wish_count_list
+        self.__parse()
+
+    def __parse(self):
+        for gift in self.__gift_list:
+            my_gift = self.__match_count(gift)
+            self.gifts.append(my_gift)
+
+    def __match_count(self, gift):
+        count = 0
+        for wish_count in self.__wish_count_list:
+            if gift.isbn == wish_count["isbn"]:
+                count = wish_count["count"]
+                break
+        my_gift = MyGift(gift.id, BookViewModel(gift.book), count)
+        return my_gift

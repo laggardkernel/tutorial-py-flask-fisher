@@ -5,6 +5,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin
+from sqlalchemy import func
 from app import db, login_manager
 from app.utils import is_isbn_or_key, YuShuBook
 
@@ -68,8 +69,15 @@ class Gift(Base):
     def __repr__(self):
         return "<Gift {}>".format(self.isbn)
 
+    @property
+    def book(self):
+        yushu_book = YuShuBook()
+        yushu_book.search_by_isbn(self.isbn)
+        # return raw data, view model
+        return yushu_book.first
+
     @classmethod
-    def recent(self):
+    def recent(cls):
         # remove ONLY_FULL_GROUP_BY in sql-mode in MySQL
         gifts = (
             Gift.query.filter_by(given=False)
@@ -81,12 +89,31 @@ class Gift(Base):
         )
         return gifts
 
-    @property
-    def book(self):
-        yushu_book = YuShuBook()
-        yushu_book.search_by_isbn(self.isbn)
-        # return raw data, view model
-        return yushu_book.first
+    @classmethod
+    def get_user_gifts(cls, uid):
+        gifts = (
+            Gift.query.filter_by(id=uid, given=False)
+            .order_by(Gift.created_time.desc())
+            .all()
+        )
+        return gifts
+
+    @classmethod
+    def get_wish_counts(cls, isbn_list):
+        """
+        Query corresponding Wish according isbn in the list
+        :param isbn_list:
+        :return: number of gifts corresponding to item in list
+        """
+        count_list = (
+            db.session.query(Wish.isbn, func.count(Wish.id))
+            .filter(Wish.fulfilled == False, Wish.isbn.in_(isbn_list), Wish.status == 1)
+            .group_by(Wish.isbn)
+            .all()
+        )
+        # return dict to embed description for each item
+        count_list = [{"isbn": _[0], "count": _[1]} for _ in count_list]
+        return count_list
 
 
 class User(Base, UserMixin):

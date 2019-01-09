@@ -7,7 +7,7 @@ from .forms import SearchFrom
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
 from app.models import Gift, Wish
-from app.view_models import BookViewModel, BookCollection, Transaction
+from app.view_models import BookViewModel, BookCollection, Transaction, MyGifts
 
 
 @bp.route("/book/search")
@@ -77,14 +77,15 @@ def index():
     return render_template("index.html", books=books)
 
 
-# @bp.route("/")
-# @login_required
-
-
-@bp.route("/gifts")
+@bp.route("/gifts/mine")
 @login_required
 def my_gifts():
-    pass
+    id_ = current_user.id
+    gifts = Gift.get_user_gifts(id_)
+    isbn_list = [gift.isbn for gift in gifts]
+    count_list = Gift.get_wish_counts(isbn_list)
+    view_model = MyGifts(gifts, count_list)
+    return render_template("my_gifts.html", gifts=view_model.gifts)
 
 
 @bp.route("/gifts/book/<isbn>")
@@ -118,6 +119,10 @@ def save_to_wish(isbn):
         flash("本书已存在于您的赠送清单或心愿清单中！")
     return redirect(url_for(".book_detail", isbn=isbn))
 
+
+@bp.route("/gifts/redraw")
+def redraw_from_gifts():
+    pass
 
 @bp.route("/pending")
 def pending():
