@@ -7,7 +7,7 @@ from .forms import SearchFrom
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
 from app.models import Gift, Wish
-from app.view_models import BookViewModel, BookCollection, Transaction, MyGifts
+from app.view_models import BookViewModel, BookCollection, Transaction, MyTransactions
 
 
 @bp.route("/book/search")
@@ -88,8 +88,8 @@ def my_gifts():
     gifts = Gift.get_user_gifts(id_)
     isbn_list = [gift.isbn for gift in gifts]
     count_list = Gift.get_wish_counts(isbn_list)
-    view_model = MyGifts(gifts, count_list)
-    return render_template("my_gifts.html", gifts=view_model.gifts)
+    view_model = MyTransactions(gifts, count_list)
+    return render_template("my_gifts.html", gifts=view_model.transactions)
 
 
 @bp.route("/gift/book/<isbn>")
@@ -114,9 +114,9 @@ def my_wishes():
     wishes = Wish.get_user_wishes(id_)
     isbn_list = [_.isbn for _ in wishes]
     count_list = Wish.get_gift_counts(isbn_list)
-    # reuse MyGifts as MyWishes view model
-    view_model = MyGifts(wishes, count_list)
-    return render_template("my_wishes.html", wishes=view_model.gifts)
+    # reuse MyTransactions as MyWishes view model
+    view_model = MyTransactions(wishes, count_list)
+    return render_template("my_wishes.html", wishes=view_model.transactions)
 
 
 @bp.route("/wish/book/<isbn>")

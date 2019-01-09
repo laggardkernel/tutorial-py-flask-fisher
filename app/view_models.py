@@ -53,23 +53,23 @@ class Transaction(object):
         )
 
 
-class MyGifts(object):
-    def __init__(self, gift_list, wish_count_list):
-        self.gifts = []
-        self.__gift_list = gift_list
-        self.__wish_count_list = wish_count_list
+class MyTransactions(object):
+    def __init__(self, gift_list, count_list):
+        self.transactions = []
+        self.__transaction_list = gift_list
+        self.__count_list = count_list
         self.__parse()
 
     def __parse(self):
-        for gift in self.__gift_list:
+        for gift in self.__transaction_list:
             my_gift = self.__match_count(gift)
-            self.gifts.append(my_gift)
+            self.transactions.append(my_gift)
 
     def __match_count(self, gift):
         count = 0
-        for wish_count in self.__wish_count_list:
-            if gift.isbn == wish_count["isbn"]:
-                count = wish_count["count"]
+        for _ in self.__count_list:
+            if gift.isbn == _["isbn"]:
+                count = _["count"]
                 break
         r = {"id": gift.id, "book": BookViewModel(gift.book), "count": count}
         return r
