@@ -70,9 +70,11 @@ def book_detail(isbn):
     )
 
 
-@bp.route("/index")
+@bp.route("/")
 def index():
-    pass
+    recent_gifts = Gift.recent()
+    books = [BookViewModel(gift.book) for gift in recent_gifts]
+    return render_template("index.html", books=books)
 
 
 # @bp.route("/")

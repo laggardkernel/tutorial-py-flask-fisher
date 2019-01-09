@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import current_app
 from flask_login import UserMixin
 from app import db, login_manager
 from app.utils import is_isbn_or_key, YuShuBook
@@ -63,6 +64,29 @@ class Gift(Base):
 
     sender_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # recipient_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+
+    def __repr__(self):
+        return "<Gift {}>".format(self.isbn)
+
+    @classmethod
+    def recent(self):
+        # remove ONLY_FULL_GROUP_BY in sql-mode in MySQL
+        gifts = (
+            Gift.query.filter_by(given=False)
+            .group_by(Gift.isbn)
+            .order_by(Gift.created_time.desc())
+            .limit(current_app.config["BOOK_RECENT_COUNT"])
+            .distinct(Gift.isbn)
+            .all()
+        )
+        return gifts
+
+    @property
+    def book(self):
+        yushu_book = YuShuBook()
+        yushu_book.search_by_isbn(self.isbn)
+        # return raw data, view model
+        return yushu_book.first
 
 
 class User(Base, UserMixin):
