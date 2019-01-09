@@ -472,6 +472,88 @@ db = SQLAlchemy(query_class=Query)
 
 Datetime 字符串转换为 datetime类型，吃饱撑的？直接定义模型时使用`db.Datetime`不就完了。
 
+## Chap 11: 业务处理
+最近书籍页面
+- 数据库查询`Gift`
+- 一定数量
+- 去重
+- 时间逆序（最新在前）
+
+排序：`User.query.order_by(User.role_id.desc())`
+
+limit: `User.query.limit(2).offset(1)` return 2 items
+
+distinct必须与分组一起使用：`.group_by(Gift.isbn).distinct().all()`
+
+逻辑上排序要位于`limit`前。
+
+换行
+- 添加反斜杠，或
+- 利用不对等括号
+
+链式调用
+- 主体(`Query`)
+- 子函数
+- 子函数返回主体对象
+- 触发语句(`first()`)
+
+类方法与实例方法，操作整个类（如返回多个实例）的方法都应该定义为类方法。`@classmethod`.
+
+推荐将查询集中到模型下面。当然，如果没有通用性，只是一次性使用，则最好放到视图函数里。
+
+极不推荐使用服务层（service），根本没有理解MVC。因为服务层里不过是一个个的静态函数，实际没有面向对象编程。（如果想要单独分离出函数，还可以使用Mixin类）
+
+礼物页面：列出用户所有赠送，以及希望获得对应礼物的人数。方案1，查询用户礼物，遍历isbn，对比Wish表中对应isbn对象个数。方案2，查询出所有isbn组成列表，传递列表查询Wish中对应对象个数。
+
+![img/1101.jpg](../assets/img/1101.png?raw=true)
+
+`.filter()`接受条件表达式，而不是`.filter_by()`那样接受关键字参数。
+
+```python
+# 原生SQLAlchemy语句而不是Flask-SQLAlchemy语句
+db.session.query(Wish).filter(
+    Wish.fulfilled == False,
+    Wish.isbn.in_(isbn_list),
+    Wish.status == 1
+).all()
+
+from sqlalchemy import func
+
+# 分组统计
+count_list = db.session.query(Wish.isbn, func.count(Wish.id)).filter(
+    Wish.fulfilled == False,
+    Wish.isbn.in_(isbn_list),
+    Wish.status == 1
+).group_by(Wish.isbn).all()
+# 打断点，做测试
+```
+
+返回列表、元组不被推荐。而是返回对象或者字典，这样能够让外层查看列表每项的意义(细节)。
+- 列表内嵌`namedtuple`，或
+- 返回字典
+
+```python
+>>> from collections import namedtuple
+>>> Point = namedtuple('Point', ['x', 'y'])
+>>> p = Point(1, 2)
+>>> p.x
+1
+>>> p.y
+2
+```
+
+`db.session.query`应用
+- 复杂查询
+- 跨模型、跨表查询
+
+不推荐在实例方法里修改实例属性？不能同意。`.sort()`和`sort()`区别就在于前者直接操作实例。实例方法直接操作实例属性完全没有问题。
+
+查看错误堆栈：由下到上查看。
+
+循环导入
+- 在末尾导入
+- 在类定义中导入（即使用时才导入）
+
 ## 教程错误总结
 Model中`default`参数使用错误，记录默认时间传递函数对象，即不带括号执行函数。
 
