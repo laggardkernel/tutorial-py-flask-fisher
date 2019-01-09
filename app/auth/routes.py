@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from . import auth
 from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 from .forms import RegistrationForm, LoginForm
 from .utils import get_redirect_target
 from app.models import User
@@ -43,7 +43,11 @@ def login():
     return render_template("auth/login.html", form=form)
 
 
-# TODO: logout
+@auth.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("web.index"))
 
 
 @auth.route("/reset", methods=["GET", "POST"])
