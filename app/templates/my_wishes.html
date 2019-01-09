@@ -26,14 +26,14 @@
               <span id="isbn">{{ wish.book.isbn }}</span>
             </div>
             <a class="link-normal"
-               href="{{ url_for('web.redraw_from_wish', isbn=wish.book.isbn) }}">
+               href="{{ url_for('web.redraw_from_wishes', isbn=wish.book.isbn) }}">
               撤销
             </a>
           </div>
           <div class="col-md-3 flex-vertical">
-            {% if wish.wishes_count %}
+            {% if wish.count %}
               <a href="{{ url_for('web.book_detail', isbn=wish.book.isbn) }}">
-                <span class="bg-info">{{ wish.wishes_count }}人赠送</span>
+                <span class="bg-info">{{ wish.count }}人赠送</span>
               </a>
             {% endif %}
           </div>

@@ -56,6 +56,39 @@ class Wish(Base):
     def check_before_create(isbn):
         pass
 
+    @property
+    def book(self):
+        yushu_book = YuShuBook()
+        yushu_book.search_by_isbn(self.isbn)
+        # return raw data, view model
+        return yushu_book.first
+
+    @classmethod
+    def get_user_wishes(cls, uid):
+        wishes = (
+            Wish.query.filter_by(id=uid, fulfilled=False)
+            .order_by(Wish.created_time.desc())
+            .all()
+        )
+        return wishes
+
+    @classmethod
+    def get_gift_counts(cls, isbn_list):
+        """
+        Query corresponding Gift according isbn in the list
+        :param isbn_list:
+        :return: number of wishes corresponding to item in list
+        """
+        count_list = (
+            db.session.query(Gift.isbn, func.count(Gift.id))
+            .filter(Gift.given == False, Gift.isbn.in_(isbn_list), Gift.status == 1)
+            .group_by(Gift.isbn)
+            .all()
+        )
+        # return dict to embed description for each item
+        count_list = [{"isbn": _[0], "count": _[1]} for _ in count_list]
+        return count_list
+
 
 class Gift(Base):
     __tablename__ = "gifts"

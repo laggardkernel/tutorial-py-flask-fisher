@@ -81,7 +81,7 @@ def index():
     return render_template("index.html", books=books)
 
 
-@bp.route("/gifts/mine")
+@bp.route("/gift/mine")
 @login_required
 def my_gifts():
     id_ = current_user.id
@@ -92,7 +92,7 @@ def my_gifts():
     return render_template("my_gifts.html", gifts=view_model.gifts)
 
 
-@bp.route("/gifts/book/<isbn>")
+@bp.route("/gift/book/<isbn>")
 @login_required
 def save_to_gifts(isbn):
     if current_user.check_before_save_to_list(isbn=isbn):
@@ -107,9 +107,16 @@ def save_to_gifts(isbn):
     return redirect(url_for(".book_detail", isbn=isbn))
 
 
-@bp.route("/wish")
-def my_wish():
-    pass
+@bp.route("/wish/mine")
+@login_required
+def my_wishes():
+    id_ = current_user.id
+    wishes = Wish.get_user_wishes(id_)
+    isbn_list = [_.isbn for _ in wishes]
+    count_list = Wish.get_gift_counts(isbn_list)
+    # reuse MyGifts as MyWishes view model
+    view_model = MyGifts(wishes, count_list)
+    return render_template("my_wishes.html", wishes=view_model.gifts)
 
 
 @bp.route("/wish/book/<isbn>")
@@ -124,8 +131,13 @@ def save_to_wish(isbn):
     return redirect(url_for(".book_detail", isbn=isbn))
 
 
-@bp.route("/gifts/redraw")
+@bp.route("/gift/redraw")
 def redraw_from_gifts():
+    pass
+
+
+@bp.route("/wish/redraw")
+def redraw_from_wishes():
     pass
 
 
