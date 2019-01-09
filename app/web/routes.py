@@ -49,9 +49,13 @@ def book_detail(isbn):
     book = BookViewModel(yushu_book.first)
 
     if current_user.is_authenticated:
-        if Gift.query.filter_by(id=current_user.id, isbn=isbn, given=False).first():
+        if Gift.query.filter_by(
+            sender_id=current_user.id, isbn=isbn, given=False
+        ).first():
             in_gift_list = True
-        if Wish.query.filter_by(id=current_user.id, isbn=isbn, fulfilled=False).first():
+        if Wish.query.filter_by(
+            recipient_id=current_user.id, isbn=isbn, fulfilled=False
+        ).first():
             in_wish_list = True
 
     gifts_in_trade = Gift.query.filter_by(isbn=isbn, given=False).all()
@@ -123,6 +127,12 @@ def save_to_wish(isbn):
 @bp.route("/gifts/redraw")
 def redraw_from_gifts():
     pass
+
+
+@bp.route("/user")
+def user_center():
+    pass
+
 
 @bp.route("/pending")
 def pending():
