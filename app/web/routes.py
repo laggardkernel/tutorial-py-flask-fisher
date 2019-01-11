@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 from flask import flash, request, render_template, current_app, redirect, url_for
 from flask_login import login_required, current_user
-from . import bp
+from . import web
 from .forms import SearchFrom
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
@@ -10,7 +11,7 @@ from app.models import Gift, Wish
 from app.view_models import BookViewModel, BookCollection, Transaction, MyTransactions
 
 
-@bp.route("/book/search")
+@web.route("/book/search")
 def search():
     """
     q/isbn:
@@ -39,7 +40,7 @@ def search():
     return render_template("search_result.html", books=books)
 
 
-@bp.route("/book/<isbn>")
+@web.route("/book/<isbn>")
 def book_detail(isbn):
     in_gift_list, in_wish_list = False, False
 
@@ -74,14 +75,14 @@ def book_detail(isbn):
     )
 
 
-@bp.route("/")
+@web.route("/")
 def index():
     recent_gifts = Gift.recent()
     books = [BookViewModel(gift.book) for gift in recent_gifts]
     return render_template("index.html", books=books)
 
 
-@bp.route("/gift/mine")
+@web.route("/gift/mine")
 @login_required
 def my_gifts():
     id_ = current_user.id
@@ -92,7 +93,7 @@ def my_gifts():
     return render_template("my_gifts.html", gifts=view_model.transactions)
 
 
-@bp.route("/gift/book/<isbn>")
+@web.route("/gift/book/<isbn>")
 @login_required
 def save_to_gifts(isbn):
     if current_user.check_before_save_to_list(isbn=isbn):
@@ -107,7 +108,7 @@ def save_to_gifts(isbn):
     return redirect(url_for(".book_detail", isbn=isbn))
 
 
-@bp.route("/wish/mine")
+@web.route("/wish/mine")
 @login_required
 def my_wishes():
     id_ = current_user.id
@@ -119,7 +120,7 @@ def my_wishes():
     return render_template("my_wishes.html", wishes=view_model.transactions)
 
 
-@bp.route("/wish/book/<isbn>")
+@web.route("/wish/book/<isbn>")
 def save_to_wish(isbn):
     if current_user.check_before_save_to_list(isbn=isbn):
         with db.auto_commit():
@@ -131,31 +132,31 @@ def save_to_wish(isbn):
     return redirect(url_for(".book_detail", isbn=isbn))
 
 
-@bp.route("/gift/redraw")
+@web.route("/gift/redraw")
 def redraw_from_gifts():
     pass
 
 
-@bp.route("/wish/redraw")
+@web.route("/wish/redraw")
 def redraw_from_wishes():
     pass
 
 
-@bp.route("/user")
+@web.route("/user")
 def user_center():
     pass
 
 
-@bp.route("/pending")
+@web.route("/pending")
 def pending():
     pass
 
 
-@bp.route("/send-drift")
+@web.route("/send-drift")
 def send_drift():
     pass
 
 
-@bp.route("/satisfy-wish")
+@web.route("/satisfy-wish")
 def satisfy_wish():
     pass

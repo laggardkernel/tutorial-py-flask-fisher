@@ -48,7 +48,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
-    from app.web import bp as web_bp
+    from app.web import web as web_bp
     from app.auth import auth as auth_bp
 
     app.register_blueprint(web_bp)

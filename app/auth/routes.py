@@ -4,7 +4,7 @@ from . import auth
 from werkzeug.urls import url_parse
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, EmailForm
 from app.models import User
 from app import db
 
@@ -56,7 +56,13 @@ def logout():
 
 @auth.route("/reset", methods=["GET", "POST"])
 def password_reset_request():
-    pass
+    # EmailForm is only used for validation, not in rendering
+    form = EmailForm(request.form)
+    if request.method == "POST" and form.validate():
+        email = form.email.data
+        user = User.query.filter_by(email=email).first_or_404()
+        pass
+    return render_template("auth/forget_password_request.html", form=form)
 
 
 @auth.route("/reset/<token>", methods=["GET", "POST"])

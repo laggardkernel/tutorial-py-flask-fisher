@@ -28,3 +28,14 @@ class RegistrationForm(Form):
     def validate_name(self, field):
         if User.query.filter_by(name=field.data).first():
             raise ValidationError("Nickname is already used!")
+
+
+class EmailForm(Form):
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(),
+            Length(8, 64),
+            Email(message="Invalid email address"),
+        ],
+    )
