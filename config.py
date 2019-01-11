@@ -47,7 +47,15 @@ class DevelopmentConfig(Config):
         os.environ.get("DEV_DATABASE_URL")
         or "mysql+pymysql://fisher:fisher@localhost/fisher"
     )
+
     # TODO: start python smtp server in development
+    #       run smptd in an sub-process in the background
+    # MAIL_SERVER = "localhost"
+    # MAIL_PORT = 8025
+    # def init_app(app):
+    #     from app.email import LoggingSMTPServer
+    #
+    #     smtpd = LoggingSMTPServer(("localhost", 8025), None)
 
 
 class TestingConfig(Config):

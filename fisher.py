@@ -2,6 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import os
+
+# from dotenv import load_dotenv
+#
+# dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+# if os.path.exists(dotenv_path):
+#     load_dotenv(dotenv_path)
+
+import click
 from app import create_app, db
 from app.models import Book, Gift, Wish, User
 from flask_migrate import Migrate
@@ -19,3 +27,27 @@ def make_shell_context():
     :return:
     """
     return {"db": db, "Book": Book, "Gift": Gift, "Wish": Wish, "User": User}
+
+
+@app.cli.command()
+@click.argument("address", default="localhost:8025")
+def smtpd(address):
+    """
+    SMTP server printing email content as str into stdout
+
+    default address: localhost:8025
+    """
+    import asyncore
+    from app.email import DebuggingSMTPServer
+
+    address, port = address.split(":")
+    if port:
+        port = int(port)
+    else:
+        port = 8025
+
+    smtpd = DebuggingSMTPServer((address, port), None)
+    try:
+        asyncore.loop()
+    except KeyboardInterrupt:
+        pass
