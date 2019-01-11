@@ -7,12 +7,12 @@ name = "pypi"
 flask = "*"
 python-dotenv = "*"
 requests = "*"
-wtforms = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-login = "*"
 pymysql = {extras = ["rsa"],version = "*"}
 flask-mail = "*"
+flask-wtf = "*"
 
 [dev-packages]
 httpie = "*"

@@ -50,7 +50,14 @@ Blueprint不是用于分拆route定义，而是用于分拆功能。
 - `count = request.args.get('count', 15, type=int)`
 - `request.args.to_ditct()`
 
-利用Form验证查询参数，`form = SearchFrom(request.args)`。直接使用`WTForms`，继承自`Form`类。`Flask-WTF`中`FlaskForm`存在csrf_token验证。
+利用Form验证查询参数，`form = SearchForm(request.args)`。直接使用`WTForms`，继承自`Form`类。
+
+`flask_wtf.FlaskForm`相较于`wtforms.Form`优势：
+- 支持`csrf_token`生成与校验(`meta.csrf`表单项控制开关，默认开启)
+- 自动填充`request.form`到`FlaskForm`实例，重写`wtforms.Form`元类方法`wrap_formdata()`实现
+- `form.validate_on_submit()`，只在提交(`POST`等)后校验，免去手动判断提交方式
+
+作者全程都没有开csrf，也没有使用`Flask-WTF`的`FlaskForm`的必要。
 
 是否封装为函数不是根据代码量来判断，而是根据其功能。
 

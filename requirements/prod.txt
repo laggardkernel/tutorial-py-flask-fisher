@@ -10,11 +10,12 @@ flask-login==0.4.1
 flask-mail==0.9.1
 flask-migrate==2.5.2
 flask-sqlalchemy==2.4.0
+flask-wtf==0.14.2
 flask==1.1.1
 idna==2.8
 itsdangerous==1.1.0
 jinja2==2.10.1
-mako==1.0.14
+mako==1.1.0
 markupsafe==1.1.1
 pycparser==2.19
 pymysql[rsa]==0.9.3

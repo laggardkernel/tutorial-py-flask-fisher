@@ -4,7 +4,7 @@
 from flask import flash, request, render_template, current_app, redirect, url_for
 from flask_login import login_required, current_user
 from . import web
-from .forms import SearchFrom
+from .forms import SearchForm
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
 from app.models import Gift, Wish
@@ -17,7 +17,7 @@ def search():
     q/isbn:
     :return:
     """
-    form = SearchFrom(request.args)
+    form = SearchForm(request.args)
     books = BookCollection()
     if form.validate():
         q = form.q.data.strip()

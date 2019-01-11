@@ -3,8 +3,8 @@
 from . import auth
 from werkzeug.urls import url_parse
 from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
-from .forms import RegistrationForm, LoginForm, EmailForm
+from flask_login import login_user, logout_user, login_required, current_user
+from .forms import RegistrationForm, LoginForm, PasswordResetRequestForm
 from app.models import User
 from app import db
 from app.email import send_mail
@@ -16,8 +16,8 @@ from app.email import send_mail
 
 @auth.route("/register", methods=["GET", "POST"])
 def register():
-    form = RegistrationForm(request.form)
-    if request.method == "POST" and form.validate():
+    form = RegistrationForm()
+    if form.validate_on_submit():
         with db.auto_commit():
             user = User()
             user.set_attrs(form.data)
@@ -29,8 +29,8 @@ def register():
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    form = LoginForm(request.form)
-    if request.method == "POST" and form.validate():
+    form = LoginForm()
+    if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
@@ -57,9 +57,12 @@ def logout():
 
 @auth.route("/reset", methods=["GET", "POST"])
 def password_reset_request():
+    if not current_user.is_anonymous:
+        flash("Reset password is for user who forgot the password.")
+        return redirect(url_for("web.index"))
     # EmailForm is only used for validation, not in rendering
-    form = EmailForm(request.form)
-    if request.method == "POST" and form.validate():
+    form = PasswordResetRequestForm()
+    if form.validate_on_submit():
         email = form.email.data.lower()
         user = User.query.filter_by(email=email).first_or_404()
         if user:

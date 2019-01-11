@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from wtforms import Form
+
+from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
 from app.models import User
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     # Why don't inherit from FlaskForm with crsf_token
     email = StringField("Email", validators=[DataRequired(), Length(8, 64), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
@@ -15,7 +16,7 @@ class LoginForm(Form):
     # submit = SubmitField("Log In")
 
 
-class RegistrationForm(Form):
+class RegistrationForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Length(8, 64), Email()])
     name = StringField("Name", validators=[DataRequired(), Length(2, 24)])
     password = PasswordField("Password", validators=[DataRequired()])

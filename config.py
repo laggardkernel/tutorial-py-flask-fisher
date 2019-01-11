@@ -18,6 +18,10 @@ class Config(object):
     # sqlite doesn't support DROP COLUMN, ALTER COLUMN, ADD CONSTRAINT
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # disable signal of db changes
 
+    # Use FlaskForm to fill form instance with request.form automatically,
+    # but disable csrf cause lacking corresponding field in the html pages
+    WTF_CSRF_ENABLED = False
+
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.qq.com")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
     MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() in ["true", "on", "1"]
