@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-basedir = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class Config(object):
@@ -11,15 +11,65 @@ class Config(object):
     """
 
     SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-gue55"
+
     # SQLALCHEMY_DATABASE_URI = os.environ.get(
     #     "DATABASE_URL"
-    # ) or "sqlite:///" + os.path.join(basedir, "app.db")
+    # ) or "sqlite:///" + os.path.join(base_dir, "app.db")
     # sqlite doesn't support DROP COLUMN, ALTER COLUMN, ADD CONSTRAINT
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://fisher:fisher@localhost/fisher"
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # disable signal of db changes
+
+    MAIL_SERVER = os.environ.get("MAIL_SERVER", "smtp.qq.com")
+    MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
+    MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() in ["true", "on", "1"]
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+    # default recipient, email for admin
+    MAIL_ADMIN = os.environ.get("MAIL_ADMIN")
+    MAIL_SUBJECT_PREFIX = "[Fisher]"
+    MAIL_SENDER = "Fisher Admin <%s>" % MAIL_USERNAME
+
     # log into stdout for heroku
     LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")
-    RESULTS_PER_PAGE = 15
 
+    RESULTS_PER_PAGE = 15
     BEANS_UPLOAD_PER_BOOK = 0.5
     BOOK_RECENT_COUNT = 30
+
+    @staticmethod
+    def init_app(app):
+        pass
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = (
+        os.environ.get("DEV_DATABASE_URL")
+        or "mysql+pymysql://fisher:fisher@localhost/fisher"
+    )
+    # TODO: start python smtp server in development
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "TEST_DATABASE_URL"
+    ) or "sqlite:///" + os.path.join(base_dir, "data-test.sqlite")
+
+    # disable csrf protection during test to avoid extraction of token
+    WTF_CSRF_ENABLED = False
+
+
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL"
+    ) or "sqlite:///" + os.path.join(base_dir, "datat.sqlite")
+
+    # TODO: move logging here?
+
+
+config = {
+    "development": DevelopmentConfig,
+    "testing": TestingConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
+}

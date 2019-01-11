@@ -6,9 +6,9 @@ import os
 from flask import Flask
 from contextlib import contextmanager
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy, BaseQuery
-from flask_migrate import Migrate
 from flask_login import LoginManager
-from config import Config
+from flask_mail import Mail
+from config import config
 
 
 class SQLAlchemy(_SQLAlchemy):
@@ -33,20 +33,22 @@ class Query(BaseQuery):
 
 db = SQLAlchemy(query_class=Query)
 
-migrate = Migrate()
 login_manager = LoginManager()
 login_manager.session_protection = "strong"  # delete non-fresh session
 login_manager.login_view = "auth.login"
 login_manager.login_message = "请先登录"
 login_manager.login_message_category = "info"
+mail = Mail()
 
 
-def create_app(config_class=Config):
+def create_app(config_name="default"):
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+
     db.init_app(app)
-    migrate.init_app(app, db)
     login_manager.init_app(app)
+    mail.init_app(app)
 
     from app.web import web as web_bp
     from app.auth import auth as auth_bp
