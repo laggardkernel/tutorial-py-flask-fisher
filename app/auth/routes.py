@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from . import auth
+
+from base64 import b64decode
 from werkzeug.urls import url_parse
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from .forms import RegistrationForm, LoginForm, PasswordResetRequestForm
-from app.models import User
+from .forms import (
+    RegistrationForm,
+    LoginForm,
+    PasswordResetRequestForm,
+    PasswordResetForm,
+)
 from app import db
+from app.models import User
 from app.email import send_mail
+from ..web.errors import page_not_found
+from . import auth
 
 
 # TODO: hook to check login status before request,
@@ -64,16 +72,14 @@ def password_reset_request():
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         email = form.email.data.lower()
-        user = User.query.filter_by(email=email).first_or_404()
+        user = User.query.filter_by(email=email).first()
         if user:
+            token = user.generate_reset_token()
             send_mail(
-                user.email,
-                "重置密码",
-                "email/reset_password",
-                user=user,
-                token="test-token",
+                user.email, "重置密码", "email/reset_password", user=user, token=token
             )
             flash("密码重置邮件已发送，注意查收")
+            return redirect(url_for("auth.login"))
         else:
             flash("邮件地址无效")
     return render_template("auth/forget_password_request.html", form=form)
@@ -81,4 +87,23 @@ def password_reset_request():
 
 @auth.route("/reset/<token>", methods=["GET", "POST"])
 def password_reset(token):
-    pass
+    if not current_user.is_anonymous:
+        flash("Reset password is for user who forgot the password.")
+        return redirect(url_for("web.index"))
+    try:
+        email, token = b64decode(token).decode("utf-8").split(":")
+    except Exception as e:
+        # TODO: support custom err msg in API's err handler
+        return page_not_found(msg="invalid token")
+    form = PasswordResetForm()
+    # form.email.data = email
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=email).first()
+        if user and user.reset_password(token, form.password.data):
+            db.session.commit()
+            flash("密码已经更新")
+            return redirect(url_for("auth.login"))
+        else:
+            flash("密码重置链接无效或者链接已过期")
+            return redirect(url_for("web.index"))
+    return render_template("auth/forget_password.html", form=form)

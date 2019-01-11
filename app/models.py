@@ -2,7 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from base64 import b64encode, b64decode
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import (
+    BadData,
+    SignatureExpired,
+    TimedJSONWebSignatureSerializer as Serializer,
+)
 from flask import current_app
 from flask_login import UserMixin
 from sqlalchemy import func
@@ -195,6 +201,32 @@ class User(Base, UserMixin):
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def generate_reset_token(self, expiration=3600):
+        s = Serializer(current_app.config["SECRET_KEY"], expires_in=expiration)
+        r = s.dumps({"reset": self.id}).decode("utf-8")
+        # add email address info into token
+        r = self.email + ":" + r
+        r = b64encode(r.encode("utf-8")).decode("utf-8")
+        return r
+
+    def reset_password(self, token, new_password):
+        s = Serializer(current_app.config["SECRET_KEY"])
+        try:
+            data = s.loads(token)
+        # TODO: feedback detail err to user
+        except SignatureExpired:
+            # raise ValidationError("The CSRF token has expired.")
+            return False
+        except BadData:
+            # raise ValidationError("The CSRF token is invalid.")
+            return False
+        if data.get("reset") != self.id:
+            return False
+        self.password = new_password
+        # commit change in the view
+        db.session.add(self)
+        return True
 
     def check_before_save_to_list(self, isbn):
         """check validity of isbn number"""

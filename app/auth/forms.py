@@ -31,7 +31,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError("Nickname is already used!")
 
 
-class EmailForm(Form):
+class PasswordResetRequestForm(FlaskForm):
     email = StringField(
         "Email",
         validators=[
@@ -40,3 +40,23 @@ class EmailForm(Form):
             Email(message="Invalid email address"),
         ],
     )
+    # check the existence of the email address in view function
+    # cause the queried User obj is needed for later use.
+
+
+class PasswordResetForm(FlaskForm):
+    # get email field data from token
+    # Disable email field cause the form in template is not rendered dynamically
+    # email = StringField(
+    #     "Email",
+    #     validators=[DataRequired(), Length(8, 64), Email()],
+    #     render_kw={"readonly": True},
+    # )
+    password = PasswordField(
+        "New password",
+        validators=[
+            DataRequired(),
+            EqualTo("password2", message="Passwords must match!"),
+        ],
+    )
+    password2 = PasswordField("Confirm new password", validators=[DataRequired()])
