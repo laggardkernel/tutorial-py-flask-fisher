@@ -23,10 +23,11 @@ class Config(object):
     MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() in ["true", "on", "1"]
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+
     # default recipient, email for admin
-    MAIL_ADMIN = os.environ.get("MAIL_ADMIN")
-    MAIL_SUBJECT_PREFIX = "[Fisher]"
-    MAIL_SENDER = "Fisher Admin <%s>" % MAIL_USERNAME
+    FISHER_ADMIN = os.environ.get("FISHER_ADMIN")
+    FISHER_MAIL_SUBJECT_PREFIX = "[Fisher]"
+    FISHER_MAIL_SENDER = "Fisher Admin <%s>" % MAIL_USERNAME
 
     # log into stdout for heroku
     LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")

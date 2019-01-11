@@ -12,6 +12,7 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-login = "*"
 pymysql = {extras = ["rsa"],version = "*"}
+flask-mail = "*"
 
 [dev-packages]
 httpie = "*"

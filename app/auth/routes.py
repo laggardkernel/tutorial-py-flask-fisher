@@ -7,6 +7,7 @@ from flask_login import login_user, logout_user, login_required
 from .forms import RegistrationForm, LoginForm, EmailForm
 from app.models import User
 from app import db
+from app.email import send_mail
 
 
 # TODO: hook to check login status before request,
@@ -59,9 +60,19 @@ def password_reset_request():
     # EmailForm is only used for validation, not in rendering
     form = EmailForm(request.form)
     if request.method == "POST" and form.validate():
-        email = form.email.data
+        email = form.email.data.lower()
         user = User.query.filter_by(email=email).first_or_404()
-        pass
+        if user:
+            send_mail(
+                user.email,
+                "重置密码",
+                "email/reset_password",
+                user=user,
+                token="test-token",
+            )
+            flash("密码重置邮件已发送，注意查收")
+        else:
+            flash("邮件地址无效")
     return render_template("auth/forget_password_request.html", form=form)
 
 
