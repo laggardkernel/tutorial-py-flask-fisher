@@ -2,6 +2,7 @@
 # vim: fileencoding=utf-8 fdm=indent sw=4 ts=4 sts=4 et
 
 from smtpd import SMTPServer, DebuggingServer
+from threading import Thread
 from app import mail
 from flask import render_template, current_app
 from flask_mail import Message
@@ -56,6 +57,15 @@ class LoggingSMTPServer(SMTPServer):
         self.logger.info("------------ END MESSAGE ------------")
 
 
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+        except Exception as e:
+            # TODO: handler mail exception
+            pass
+
+
 def send_mail(to, subject, template, **kw):
     app = current_app._get_current_object()
     msg = Message(
@@ -64,4 +74,6 @@ def send_mail(to, subject, template, **kw):
         recipients=[to],
     )
     msg.html = render_template(template + ".html", **kw)
-    mail.send(msg)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
+    return thr

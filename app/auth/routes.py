@@ -78,7 +78,7 @@ def password_reset_request():
             send_mail(
                 user.email, "重置密码", "email/reset_password", user=user, token=token
             )
-            flash("密码重置邮件已发送，注意查收")
+            flash("密码重置邮件已发送到{}，注意查收".format(user.email))
             return redirect(url_for("auth.login"))
         else:
             flash("邮件地址无效")
