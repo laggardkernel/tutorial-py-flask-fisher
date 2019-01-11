@@ -18,9 +18,9 @@ from app.utils import is_isbn_or_key, YuShuBook
 
 class Base(db.Model):
     __abstract__ = True  # No table creation
-    created_time = db.Column(db.DateTime, default=datetime.utcnow)
+    created_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     # soft deletion
-    status = db.Column(db.SmallInteger, default=1)
+    is_deleted = db.Column(db.SmallInteger, nullable=False, default=0)
 
     def set_attrs(self, attrs_dict):
         """Helper to fill form data into model instance quickly"""
@@ -87,7 +87,7 @@ class Wish(Base):
         """
         count_list = (
             db.session.query(Gift.isbn, func.count(Gift.id))
-            .filter(Gift.given == False, Gift.isbn.in_(isbn_list), Gift.status == 1)
+            .filter(Gift.given == False, Gift.isbn.in_(isbn_list), Gift.is_deleted == 0)
             .group_by(Gift.isbn)
             .all()
         )
@@ -146,7 +146,7 @@ class Gift(Base):
         """
         count_list = (
             db.session.query(Wish.isbn, func.count(Wish.id))
-            .filter(Wish.fulfilled == False, Wish.isbn.in_(isbn_list), Wish.status == 1)
+            .filter(Wish.fulfilled == False, Wish.isbn.in_(isbn_list), Wish.is_deleted == 0)
             .group_by(Wish.isbn)
             .all()
         )

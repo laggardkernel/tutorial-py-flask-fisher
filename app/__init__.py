@@ -26,8 +26,8 @@ class SQLAlchemy(_SQLAlchemy):
 
 class Query(BaseQuery):
     def filter_by(self, **kwargs):
-        if "status" not in kwargs:
-            kwargs["status"] = 1
+        if "is_deleted" not in kwargs:
+            kwargs["is_deleted"] = 0
         return super().filter_by(**kwargs)
 
 
