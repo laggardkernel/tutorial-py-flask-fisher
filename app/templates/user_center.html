@@ -21,12 +21,12 @@
         </div>
         <div class="row">
           <div class="col-md-8 col-md-offset-2 flex-vertical personal-detail">
-            <div><span>送出/收到：</span><span>{{ user.send_receive }}</span></div>
+            <div><span>送出/收到：</span><span>{{ user.sent_received }}</span></div>
             <div><span>当前鱼豆：</span><span>{{ user.beans }}</span></div>
             <div><span>登录邮箱：</span><span>{{ user.email }}</span></div>
             <div>
               <span>登录密码：********* </span>
-              <a href="{{ url_for('web.change_password') }}">修改</a>
+              <a href="{{ url_for('auth.password_reset_request') }}">修改</a>
             </div>
           </div>
         </div>
