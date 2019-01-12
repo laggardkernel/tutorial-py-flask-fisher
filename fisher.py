@@ -11,7 +11,7 @@ import os
 
 import click
 from app import create_app, db
-from app.models import Book, Gift, Wish, User
+from app.models import Book, Gift, Wish, User, Float
 from flask_migrate import Migrate
 
 # `os.getenv` is just a wrapper for `os.environ.get`
@@ -26,7 +26,14 @@ def make_shell_context():
     Add additional context into flask shell
     :return:
     """
-    return {"db": db, "Book": Book, "Gift": Gift, "Wish": Wish, "User": User}
+    return {
+        "db": db,
+        "Book": Book,
+        "Gift": Gift,
+        "Wish": Wish,
+        "User": User,
+        "Float": Float,
+    }
 
 
 @app.cli.command()

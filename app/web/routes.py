@@ -8,7 +8,13 @@ from .forms import SearchForm, FloatForm
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
 from app.models import Gift, Wish, Float
-from app.view_models import BookViewModel, BookCollection, Transaction, MyTransactions
+from app.view_models import (
+    BookViewModel,
+    BookCollection,
+    Transaction,
+    MyTransactions,
+    FloatCollection,
+)
 from app.email import send_mail
 
 
@@ -178,6 +184,23 @@ def request_float(id):
     return render_template("float_request.html", **context)
 
 
+@web.route("/transactions")
+@login_required
+def transactions():
+    floats = (
+        Float.query.filter(
+            (Float.requester_id == current_user.id)
+            | (Float.giver_id == current_user.id)
+        )
+        .order_by(Float.created_time.desc())
+        .all()
+    )
+    data=None
+    if floats:
+        data = FloatCollection(floats, current_user.id).data
+    return render_template("transactions.html", floats=data)
+
+
 @web.route("/gift/redraw")
 def redraw_from_gifts():
     pass
@@ -190,11 +213,6 @@ def redraw_from_wishes():
 
 @web.route("/user")
 def user_center():
-    pass
-
-
-@web.route("/in-transaction")
-def in_transaction():
     pass
 
 
