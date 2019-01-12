@@ -170,7 +170,7 @@ def request_float(id):
             float.book_author = book.author
             float.book_img = book.image
 
-            current_user.beans -= 1
+            current_user.beans -= current_app.config["BEANS_REQUEST_PER_BOOK"]
 
             db.session.add(float)
         send_mail(
@@ -208,7 +208,7 @@ def withdraw_float(id):
     with db.auto_commit():
         item = Float.query.filter_by(request_id=current_user.id, id=id).first_or_404()
         item.status = FloatStatus.Withdrew
-        current_user.beans += 1
+        current_user.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
     return redirect(url_for("web.transactions"))
 
 
@@ -218,7 +218,7 @@ def refuse_float(id):
     with db.auto_commit():
         item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
         item.status = FloatStatus.Refused
-        current_user.beans += 1
+        current_user.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
     return redirect(url_for("web.transactions"))
 
 
@@ -229,7 +229,7 @@ def mail_float(id):
         item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
         # TODO: accept
         item.status = FloatStatus.Finished
-        current_user.beans += 1
+        current_user.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
         # update gift and wish status
         gift = Gift.query.get_or_404(item.gift_id)
         gift.given = True
