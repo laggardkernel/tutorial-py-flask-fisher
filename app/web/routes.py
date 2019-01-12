@@ -239,14 +239,28 @@ def mail_float(id):
     return redirect(url_for("web.transactions"))
 
 
-@web.route("/gift/redraw")
-def redraw_from_gifts():
-    pass
+@web.route("/gift/<int:id>/withdraw")
+def withdraw_gift(id):
+    gift = Gift.query.filter_by(id=id, given=False).first_or_404()
+    # cancel action if the gift is in transaction
+    float = Float.query.filter_by(gift_id=id, status=FloatStatus.Pending).first()
+    if float:
+        flash("当前礼物出于交易状态，请先完成交易")
+    else:
+        with db.auto_commit():
+            current_user.beans -= current_app.config["BEANS_UPLOAD_PER_BOOK"]
+            gift.delete()
+    return redirect(url_for("web.my_gifts"))
 
 
-@web.route("/wish/redraw")
-def redraw_from_wishes():
-    pass
+# @web.route("/wish/<int:id>/withdraw")
+@web.route("/wish/<isbn>/withdraw")
+def withdraw_wish(isbn):
+    # wish = Wish.query.filter_by(id=id, fulfilled=False).first_or_404()
+    wish = Wish.query.filter_by(isbn=isbn, fulfilled=False).first_or_404()
+    with db.auto_commit():
+        wish.delete()
+    return redirect(url_for("web.my_wishes"))
 
 
 @web.route("/user")

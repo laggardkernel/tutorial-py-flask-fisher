@@ -26,7 +26,7 @@
               <span id="isbn">{{ gift.book.isbn }}</span>
             </div>
             <a class="link-normal"
-               href="{{ url_for('web.redraw_from_gifts', gid=gift.id) }}">
+               href="{{ url_for('web.withdraw_gift', id=gift.id) }}">
               撤销
             </a>
           </div>
