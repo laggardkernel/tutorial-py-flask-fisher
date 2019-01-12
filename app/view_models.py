@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from app.models import FloatStatus
+
 
 class BookViewModel(object):
     def __init__(self, book):
@@ -72,4 +74,50 @@ class MyTransactions(object):
                 count = _["count"]
                 break
         r = {"id": gift.id, "book": BookViewModel(gift.book), "count": count}
+        return r
+
+
+class FloatCollection(object):
+    def __init__(self, floats, user_id):
+        self.data = []
+        self.__parse(floats, user_id)
+
+    def __parse(self, floats, user_id):
+        for item in floats:
+            temp = FloatModel(item, user_id)
+            self.data.append(temp.data)
+
+
+class FloatModel(object):
+    def __init__(self, float, user_id):
+        self.data = []
+        self.data = self.__parse(float, user_id)
+
+    @staticmethod
+    def requester_or_giver(float, user_id):
+        if float.requester_id == user_id:
+            identity = "requester"
+        else:
+            identity = "giver"
+        return identity
+
+    def __parse(self, float, user_id):
+        identity = self.requester_or_giver(float, user_id)
+        transaction_status = FloatStatus.status_str(float.status, identity)
+        r = {
+            "id": float.id,
+            "book_title": float.book_title,
+            "book_author": float.book_author,
+            "book_img": float.book_img,
+            "date": float.created_time,
+            "message": float.message,
+            "address": float.address,
+            "name": float.name,
+            "phone": float.phone,
+            "status": transaction_status,
+            "identity": identity,
+            "operator": float.requester_name
+            if identity != "requester"
+            else float.giver_name,
+        }
         return r
