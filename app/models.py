@@ -30,6 +30,9 @@ class Base(db.Model):
             if hasattr(self.__class__, key) and key != "id":
                 setattr(self, key, value)
 
+    def delete(self):
+        self.is_deleted = 1
+
 
 class Book(Base):
     # TODO: cache YushuBook into Book Model

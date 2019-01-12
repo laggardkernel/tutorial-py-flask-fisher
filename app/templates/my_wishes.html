@@ -26,7 +26,7 @@
               <span id="isbn">{{ wish.book.isbn }}</span>
             </div>
             <a class="link-normal"
-               href="{{ url_for('web.redraw_from_wishes', isbn=wish.book.isbn) }}">
+               href="{{ url_for('web.withdraw_wish', isbn=wish.book.isbn) }}">
               撤销
             </a>
           </div>
