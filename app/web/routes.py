@@ -7,7 +7,7 @@ from . import web
 from .forms import SearchForm, FloatForm
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
-from app.models import Gift, Wish, Float
+from app.models import User, Gift, Wish, Float
 from app.view_models import (
     BookViewModel,
     BookCollection,
@@ -263,11 +263,6 @@ def withdraw_wish(isbn):
     return redirect(url_for("web.my_wishes"))
 
 
-@web.route("/user")
-def user_center():
-    pass
-
-
 @web.route("/wish/<id>/fullfill")
 def fullfill_wish(id):
     wish = Wish.query.get_or_404(id)
@@ -282,3 +277,10 @@ def fullfill_wish(id):
         )
         flash("赠送请求邮件已经发送")
     return redirect(url_for("web.book_detail", isbn=wish.isbn))
+
+
+@web.route("/user/<int:id>")
+def user_center(id):
+    user = User.query.get_or_404(id)
+    user = user.summary
+    return render_template("user_center.html", user=user)

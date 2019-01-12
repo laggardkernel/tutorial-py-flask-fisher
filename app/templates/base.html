@@ -67,7 +67,7 @@
          <a style="margin-left: 40px;" href="{{ url_for('auth.register') }}">注册</a>
        </div>
      {% else %}
-       <a href="{{ url_for('web.user_center') }}">{{ current_user.name }}的鱼书</a>
+       <a href="{{ url_for('web.user_center', id=current_user.id) }}">{{ current_user.name }}的鱼书</a>
        <a style="margin-left: 40px;" href="{{ url_for('auth.logout') }}">注销</a>
      {% endif %}
   </div>
