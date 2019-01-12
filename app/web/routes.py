@@ -4,11 +4,12 @@
 from flask import flash, request, render_template, current_app, redirect, url_for
 from flask_login import login_required, current_user
 from . import web
-from .forms import SearchForm
+from .forms import SearchForm, FloatForm
 from app.utils import is_isbn_or_key, YuShuBook
 from app import db
-from app.models import Gift, Wish
+from app.models import Gift, Wish, Float
 from app.view_models import BookViewModel, BookCollection, Transaction, MyTransactions
+from app.email import send_mail
 
 
 @web.route("/book/search")
@@ -132,6 +133,51 @@ def save_to_wish(isbn):
     return redirect(url_for(".book_detail", isbn=isbn))
 
 
+@web.route("/float/<int:id>", methods=["GET", "POST"])
+@login_required
+def request_float(id):
+    gift = Gift.query.get_or_404(id)
+    if gift.do_own_gift(current_user.id):
+        flash("请勿向自己所要书籍")
+        return redirect(url_for("web.book_detail", isbn=gift.isbn))
+    if not current_user.can_request_float():
+        # beans not enough, or not sending enough books
+        return render_template("float_error.html", beans=current_user.beans)
+
+    form = FloatForm()
+    if form.validate_on_submit():
+        # fill form data into Float instance
+        with db.auto_commit():
+            float = Float()
+            form.populate_obj(float)
+
+            float.gift_id = gift.id
+            float.requester_id = current_user.id
+            float.requester_name = current_user.name
+            float.giver_id = gift.sender_id
+            float.giver_name = gift.sender.name
+
+            book = BookViewModel(gift.book)
+            float.isbn = book.isbn
+            float.book_title = book.title
+            float.book_author = book.author
+            float.book_img = book.image
+
+            current_user.beans -= 1
+
+            db.session.add(float)
+        send_mail(
+            gift.sender.email,
+            "书籍索取请求",
+            "email/request_gift",
+            requester=current_user,
+            gift=gift,
+        )
+        # TODO: redirect to float list page
+    context = {"giver": gift.sender.summary, "beans": current_user.beans, "form": form}
+    return render_template("float_request.html", **context)
+
+
 @web.route("/gift/redraw")
 def redraw_from_gifts():
     pass
@@ -147,8 +193,8 @@ def user_center():
     pass
 
 
-@web.route("/pending")
-def pending():
+@web.route("/in-transaction")
+def in_transaction():
     pass
 
 
