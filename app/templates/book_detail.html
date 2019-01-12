@@ -126,7 +126,7 @@
         </div>
         <div class="col-md-2">
           <a class="btn-normal"
-             href="{{ url_for('web.satisfy_wish', wid=wish.id, isbn=[book.isbn]) }}">
+             href="{{ url_for('web.fullfill_wish', id=wish.id, isbn=[book.isbn]) }}">
             向他赠送此书
           </a>
         </div>

@@ -268,6 +268,17 @@ def user_center():
     pass
 
 
-@web.route("/satisfy-wish")
-def satisfy_wish():
-    pass
+@web.route("/wish/<id>/fullfill")
+def fullfill_wish(id):
+    wish = Wish.query.get_or_404(id)
+    gift = Gift.query.filter_by(
+        sender_id=current_user.id, isbn=wish.isbn, given=False
+    ).first()
+    if not gift:
+        flash("您还未上传书籍！")
+    else:
+        send_mail(
+            wish.recipient.email, "书籍赠送提醒", "email/fullfill_wish", wish=wish, gift=gift
+        )
+        flash("赠送请求邮件已经发送")
+    return redirect(url_for("web.book_detail", isbn=wish.isbn))
