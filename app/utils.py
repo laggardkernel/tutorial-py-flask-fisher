@@ -36,7 +36,7 @@ class YuShuBook:
     def search_by_isbn(self, isbn):
         url = self.isbn_url.format(isbn)
         r = HTTP.get(url)
-        # TODO: cache the result into db. lookup before cache.
+        # TODO: cache the result into db (Book Model). lookup before cache.
         self.__fill_single(r)
 
     def __fill_single(self, data):

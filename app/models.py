@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from base64 import b64encode, b64decode
+from enum import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import (
     BadData,
@@ -31,6 +32,7 @@ class Base(db.Model):
 
 
 class Book(Base):
+    # TODO: cache YushuBook into Book Model
     __tablename__ = "books"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(50), nullable=False)
@@ -129,9 +131,9 @@ class Gift(Base):
         return gifts
 
     @classmethod
-    def get_user_gifts(cls, uid):
+    def get_user_gifts(cls, id_):
         gifts = (
-            Gift.query.filter_by(id=uid, given=False)
+            Gift.query.filter_by(id=id_, given=False)
             .order_by(Gift.created_time.desc())
             .all()
         )
@@ -146,13 +148,18 @@ class Gift(Base):
         """
         count_list = (
             db.session.query(Wish.isbn, func.count(Wish.id))
-            .filter(Wish.fulfilled == False, Wish.isbn.in_(isbn_list), Wish.is_deleted == 0)
+            .filter(
+                Wish.fulfilled == False, Wish.isbn.in_(isbn_list), Wish.is_deleted == 0
+            )
             .group_by(Wish.isbn)
             .all()
         )
         # return dict to embed description for each item
         count_list = [{"isbn": _[0], "count": _[1]} for _ in count_list]
         return count_list
+
+    def do_own_gift(self, user_id):
+        return True if self.sender_id == user_id else False
 
 
 class User(Base, UserMixin):
@@ -249,8 +256,74 @@ class User(Base, UserMixin):
         else:
             return False
 
+    def can_request_float(self):
+        # check number of beans
+        if self.beans < 1:
+            return False
+        # permit requesting two books after sending one book
+        given_count = Gift.query.filter_by(sender_id=self.id, given=True).count()
+        received_count = Float.query.filter_by(
+            requester_id=self.id, status=FloatStatus.Accepted
+        ).count()
+        return True if received_count // 2 <= given_count else False
+
+    @property
+    def summary(self):
+        r = dict(
+            name=self.name,
+            beans=self.beans,
+            email=self.email,
+            sent_received="{}/{}".format(self.sent_counter, self.received_counter),
+        )
+        return r
+
 
 @login_manager.user_loader
 def load_user(user_id):
     """load user into current_user"""
     return User.query.get(int(user_id))
+
+
+class FloatStatus(Enum):
+    Pending = 1
+    Accepted = 2
+    Refused = 3
+    Withdrew = 4
+    Finished = 5
+
+
+class Float(Base):
+    __tablename__ = "floats"
+    id = db.Column(db.Integer, primary_key=True)
+    # recipient info
+    name = db.Column(db.String(20), nullable=False)
+    address = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.String(200))
+    phone = db.Column(db.String(20), nullable=False)
+    # book info
+    isbn = db.Column(db.String(13))
+    book_title = db.Column(db.String(50))
+    book_author = db.Column(db.String(30))
+    book_img = db.Column(db.String(140))
+
+    gift_id = db.Column(db.Integer, nullable=False)
+    # define requester and giver info directly but not with relationship
+    # to keep history data
+    # requester
+    requester_id = db.Column(db.Integer, nullable=False)
+    requester_name = db.Column(db.String(24))
+    # giver
+    giver_id = db.Column(db.Integer, nullable=False)
+    giver_name = db.Column(db.String(24))
+    # float status
+    transaction_status = db.Column(db.SmallInteger, default=1, nullable=False)
+
+    @property
+    def status(self):
+        return FloatStatus(self.transaction_status)
+
+    @status.setter
+    def status(self, value):
+        if isinstance(value, FloatStatus):
+            value = int(value)
+        self.transaction_status = value
