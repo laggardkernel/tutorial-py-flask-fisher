@@ -101,7 +101,7 @@ def my_gifts():
     return render_template("my_gifts.html", gifts=view_model.transactions)
 
 
-@web.route("/gift/book/<isbn>")
+@web.route("/gift/<isbn>")
 @login_required
 def save_to_gifts(isbn):
     if current_user.check_before_save_to_list(isbn=isbn):

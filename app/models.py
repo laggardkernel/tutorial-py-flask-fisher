@@ -72,9 +72,9 @@ class Wish(Base):
         return yushu_book.first
 
     @classmethod
-    def get_user_wishes(cls, uid):
+    def get_user_wishes(cls, user_id):
         wishes = (
-            Wish.query.filter_by(id=uid, fulfilled=False)
+            Wish.query.filter_by(recipient_id=user_id, fulfilled=False)
             .order_by(Wish.created_time.desc())
             .all()
         )
@@ -131,9 +131,9 @@ class Gift(Base):
         return gifts
 
     @classmethod
-    def get_user_gifts(cls, id_):
+    def get_user_gifts(cls, user_id):
         gifts = (
-            Gift.query.filter_by(id=id_, given=False)
+            Gift.query.filter_by(sender_id=user_id, given=False)
             .order_by(Gift.created_time.desc())
             .all()
         )
