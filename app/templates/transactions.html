@@ -17,54 +17,54 @@
             <img class="book-img-small shadow" src="{{ item.book_img | safe }}" alt="封面">
           </div>
           <div style="margin-left:-30px;" class="col-md-8 flex-vertical description">
-            <div><span>书籍名：</span><span>{{  item.book_title }}</span></div>
-            <div><span>作者：</span><span>{{  item.book_author }}</span></div>
-            <div><span>发起日期：</span><span>{{  item.date }}</span></div>
+            <div><span>书籍名：</span><span>{{ item.book_title }}</span></div>
+            <div><span>作者：</span><span>{{ item.book_author }}</span></div>
+            <div><span>发起日期：</span><span>{{ item.date }}</span></div>
             <div>
               {% if item.identity == 'requester' %}
                 <span>向他请求：</span>
               {% else %}
                 <span>请求者：</span>
               {% endif %}
-              <span>{{  item.operator }}</span>
+              <span>{{ item.operator }}</span>
             </div>
             <div>
               <span>状态：</span>
-              <span class="status-color">{{ item.status }}</span>
+              <span class="status-color">{{ item.status_str }}</span>
             </div>
             <div>
               <span>邮寄地址：</span>
               <span class="space">{{ item.name }}</span>
-              <span>{{  item.address }}</span>
+              <span>{{ item.address }}</span>
             </div>
             <div><span>联系电话：</span><span>{{ item.phone }}</span></div>
           </div>
           <div class="col-md-2 flex-vertical">
-            {% if  item.identity == 'giver' and  item.status.value == 1 %}
-              <a href="{{ url_for('web.mailed_drift', did= item.drift_id) }}">
+            {% if item.identity == 'giver' and item.status.value == 1 %}
+              <a href="{{ url_for('web.mail_float', id=item.id) }}">
                 <span class="btn-normal">已邮寄</span>
               </a>
-              <a style="margin-top:20px;" href="{{ url_for('web.reject_drift', did= item.drift_id) }}">
-                <span class="btn-shadow">拒&nbsp;&nbsp;&nbsp;绝</span>
+              <a style="margin-top:20px;" href="{{ url_for('web.refuse_float', id=item.id) }}">
+                <span class="btn-shadow">拒　绝</span>
               </a>
             {% endif %}
-            {% if  item.identity == 'requester' and  item.status.value == 1 %}
-              <a href="{{ url_for('web.redraw_drift', did= item.drift_id) }}">
-                <span class="btn-normal">撤 销</span>
+            {% if item.identity == 'requester' and item.status.value == 1 %}
+              <a href="{{ url_for('web.withdraw_float', id=item.id) }}">
+                <span class="btn-normal">撤　销</span>
               </a>
             {% endif %}
           </div>
         </div>
         <div style="margin-top:20px;" class="row message-container">
           <div class="col-md-12">
-            {% if  item.identity == 'receiver' %}
+            {% if item.identity == 'receiver' %}
               {% set message_flag = '他的留言：' %}
             {% else %}
               {% set message_flag = '你的留言：' %}
             {% endif %}
             <p>
               <span class="message-flag">{{ message_flag }}</span>
-              <span>{{  item.message }}</span>
+              <span>{{ item.message }}</span>
             </p>
           </div>
         </div>

@@ -103,7 +103,7 @@ class FloatModel(object):
 
     def __parse(self, float, user_id):
         identity = self.requester_or_giver(float, user_id)
-        transaction_status = FloatStatus.status_str(float.status, identity)
+        status_str = FloatStatus.status_str(float.status, identity)
         r = {
             "id": float.id,
             "book_title": float.book_title,
@@ -114,7 +114,8 @@ class FloatModel(object):
             "address": float.address,
             "name": float.name,
             "phone": float.phone,
-            "status": transaction_status,
+            "status": float.status,
+            "status_str": status_str,
             "identity": identity,
             "operator": float.requester_name
             if identity != "requester"

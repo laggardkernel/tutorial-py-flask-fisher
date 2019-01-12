@@ -13,6 +13,7 @@ from app.view_models import (
     BookCollection,
     Transaction,
     MyTransactions,
+    FloatStatus,
     FloatCollection,
 )
 from app.email import send_mail
@@ -195,10 +196,47 @@ def transactions():
         .order_by(Float.created_time.desc())
         .all()
     )
-    data=None
+    data = None
     if floats:
         data = FloatCollection(floats, current_user.id).data
     return render_template("transactions.html", floats=data)
+
+
+@web.route("/float/<int:id>/withdraw")
+@login_required
+def withdraw_float(id):
+    with db.auto_commit():
+        item = Float.query.filter_by(request_id=current_user.id, id=id).first_or_404()
+        item.status = FloatStatus.Withdrew
+        current_user.beans += 1
+    return redirect(url_for("web.transactions"))
+
+
+@web.route("/float/<int:id>/refuse")
+@login_required
+def refuse_float(id):
+    with db.auto_commit():
+        item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
+        item.status = FloatStatus.Refused
+        current_user.beans += 1
+    return redirect(url_for("web.transactions"))
+
+
+@web.route("/float/<int:id>/mail")
+@login_required
+def mail_float(id):
+    with db.auto_commit():
+        item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
+        # TODO: accept
+        item.status = FloatStatus.Finished
+        current_user.beans += 1
+        # update gift and wish status
+        gift = Gift.query.get_or_404(item.gift_id)
+        gift.given = True
+        Wish.query.filter_by(
+            isbn=item.isbn, recipient_id=item.requester_id, fulfilled=False
+        ).update({Wish.fulfilled: True})
+    return redirect(url_for("web.transactions"))
 
 
 @web.route("/gift/redraw")
@@ -213,11 +251,6 @@ def redraw_from_wishes():
 
 @web.route("/user")
 def user_center():
-    pass
-
-
-@web.route("/send-drift")
-def send_drift():
     pass
 
 

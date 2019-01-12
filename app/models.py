@@ -291,16 +291,16 @@ class FloatStatus(Enum):
     Withdrew = 4
     Finished = 5
 
-    @staticmethod
-    def status_str(status, key):
-        if isinstance(status, FloatStatus):
-            status = status.value
+    @classmethod
+    def status_str(cls, status, key):
+        if isinstance(status, int):
+            status = FloatStatus(status)
         key_map = {
-            1: {"requester": "等待对方确认", "giver": "等待你确认"},
-            2: {"requester": "对方接受请求", "giver": "你已接受"},
-            3: {"requester": "对方拒绝请求", "giver": "你已拒绝"},
-            4: {"requester": "对方撤销请求", "giver": "你已撤销请求"},
-            5: {"requester": "对方已完成赠送", "giver": "你已完成赠送"},
+            cls.Pending: {"requester": "等待对方确认", "giver": "等待你确认"},
+            cls.Accepted: {"requester": "对方接受请求", "giver": "你已接受"},
+            cls.Refused: {"requester": "对方拒绝请求", "giver": "你已拒绝"},
+            cls.Withdrew: {"requester": "对方撤销请求", "giver": "你已撤销请求"},
+            cls.Finished: {"requester": "对方已完成赠送", "giver": "你已完成赠送"},
         }
         return key_map[status][key]
 
@@ -338,5 +338,5 @@ class Float(Base):
     @status.setter
     def status(self, value):
         if isinstance(value, FloatStatus):
-            value = int(value)
+            value = value.value
         self.transaction_status = value
