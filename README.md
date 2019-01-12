@@ -549,6 +549,141 @@ count_list = db.session.query(Wish.isbn, func.count(Wish.id)).filter(
 - 在末尾导入
 - 在类定义中导入（即使用时才导入）
 
+## Chap 12: 更多视图
+重置密码，如何在URL中附带用户认证信息。
+
+![URL附带认证信息](../assets/img/1201.png?raw=true)
+
+借助第三方包`itsdangerous`或者`PyJWT`生成token，均支持过期时间。
+
+`.first_or_404()`是通过`abort(404)`抛出`HTTPException`实例。
+
+类函数`__call__`让对象（非类）变得可以被调用，即可调用对象。
+- 统一调用接口
+
+即此对象被调用时类似于函数方便被调用，外层函数可能无法得知传入的对象是什么。不必要针对不同对象判断，以调用对应的对象方法。
+
+![可调用对象](../assets/img/1202.png?raw=true)
+
+在`werkzueg/exceptions.py`中，`_find_exceptions()`装载所有`HTTPException`子类到全局字典`default_exceptions`。`Abort.mapping`字典存储了所有werkzeug定义的异常对象。最终`raise self.mapping[code](*args, **kwargs)`通过状态码404找到对象异常类，抛出对应异常实例。(其实是`HTTPException`子类的实例)
+
+![first_or_404 异常抛出](../assets/img/1203.png?raw=true)
+
+借鉴`_find_exceptions()`函数，对模块中类、对象进行扫描(`globals()`)。
+
+```python
+default_exceptions = {}
+__all__ = ["HTTPException"]
+
+
+def _find_exceptions():
+    for _name, obj in iteritems(globals()):
+        try:
+            is_http_exception = issubclass(obj, HTTPException)
+        except TypeError:
+            is_http_exception = False
+        if not is_http_exception or obj.code is None:
+            continue
+        __all__.append(obj.__name__)
+        old_obj = default_exceptions.get(obj.code, None)
+        # if obj code is changed, which means class of obj is changed
+        if old_obj is not None and issubclass(obj, old_obj):
+            continue
+        default_exceptions[obj.code] = obj
+
+
+_find_exceptions()
+del _find_exceptions
+```
+
+404对应`NotFound`实例异常（`HTTPException`子类）。`Response`对象在`HTTPException`类中构建。
+
+继承`HTTPException`是非常好的RESTFul API实现方式。
+
+`@bp.app_errorhandler(404)`装饰器，全局（所有路由）拦截错误并处理。
+
+AOP，Aspect Oriented Programming，面向切面编程。针对业务处理过程中的切面进行提取，它所面对的是处理过程中的某个步骤或阶段，以获得逻辑过程中各部分之间低耦合性的隔离效果。其目的是在某个流程中某点进行统一集中式处理。(类似于钩子、signal？)
+
+腾讯企业邮箱：免去用户自己维护邮件服务器的麻烦，直接使用自己的域名，腾讯企业邮箱服务提供邮件服务。
+- [怎样创建腾讯企业邮箱？](https://service.exmail.qq.com/cgi-bin/help?subtype=1&&id=20012&&no=1001214)
+
+利用token重置密码，因为重置密码无需登录，token需要提供用户信息，或者是通过token信息能够确认是哪个用户。
+
+改用`flask_wtf.FlaskForm`而不是`wtforms.Form`
+- 支持`request.form`自动填充
+- `form.validate_on_submit()` shortcut简化了请求类型判断
+
+`current_app`代理对象的访问实际上是访问`_app_ctx_context`栈顶元素。`send_async_email`基于线程实现，在异步函数中线程隔离，对应栈为空。故需要传递`Flask`实例，`current_app._get_current_object()`.
+
+不要盲目追求并发和异步编程，因为其开发、调试需考虑额外问题。
+
+发起图书索要、赠送。
+
+![](../assets/img/1204.png?raw=true)
+
+`Float`（鱼漂）模型。请求者与赠送者信息没有使用外键、模型关联，而是使用`String`类记录。
+- 模型关联记录的信息是实时的
+- **重复（冗余）字段记录历史状态**
+
+具有记录性质的字段不要做模型关联。
+
+鱼漂状态使用枚举类，这样状态值可以使用非数值表示，更易懂。
+
+```python
+from enum import Enum
+
+class FloatStatus(Enum):
+    Pending = 1
+    Accepted = 2
+    Refused = 3
+    Withdrew = 4
+    Finished = 5
+
+class Float(Base):
+    # ...
+    transaction_status = db.Column(db.SmallInteger, default=1)
+
+    @property
+    def status(self):
+        return FloatStatus(self.transaction_status)
+
+    @status.setter
+    def status(self, value):
+        if isinstance(value, FloatStatus):
+            value = int(value)
+        self.transaction_status = value
+```
+
+实际上，枚举类不能直接参与查询赋值，需要做数据类型转换。event listener也做类似工作，但是不确定其触发时间。
+
+简单的数据转换可以使用`@property`属性在模型下完成，而不是`ViewModel`，根据语义（数据意义）判断。
+
+作者推荐视图函数中重构分离出的函数放到视图函数文件底部。个人风格，没有重用需求就不要瞎JB重构分离函数。
+
+`request.form.populate_obg(formObj)`，快速填充提交的表单内容到`wtforms.Form`类。或者直接`flask_wtf.FlaskForm`，支持自动填充。
+
+有一个很大的问题，`Book` Model根本没用到…… 完全摆设。
+
+数据库查询或关系，`filter` with `|` or `or_`
+- [Flask SQLAlchemy filter by value OR another](https://stackoverflow.com/questions/40535547/flask-sqlalchemy-filter-by-value-or-another)
+- [Common Filter Operators](https://docs.sqlalchemy.org/en/13/orm/tutorial.html#common-filter-operators)
+- [Using OR in SQLAlchemy](https://stackoverflow.com/questions/7942547/using-or-in-sqlalchemy)
+
+```python
+user = User.query.filter((User.email == email) | (User.name == name)).first()
+
+from sqlalchemy import or_
+filter(or_(User.name == 'ed', User.name == 'wendy'))
+```
+
+类的封装性：不要直接引入全局变量，而是要由参数传入。
+
+Python没有case语句，通过字典模仿case语句。
+
+单体和集合：分开定义不同类，或者将单体作为字典直接定义集合类。推荐分开定义，因为利用字典定义单体不方便做扩展。
+
+超权：使用URL操作其他用户数据。属于路由设计权限考虑不周。
+
 ## 教程错误总结
 Model中`default`参数使用错误，记录默认时间传递函数对象，即不带括号执行函数。
 
