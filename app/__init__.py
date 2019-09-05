@@ -64,7 +64,7 @@ def create_app(config_name="default"):
             stream_handler.setLevel(logging.INFO)
             app.logger.addHandler(stream_handler)
         else:
-            if not os.path.exists("log"):
+            if not os.path.exists("logs"):
                 os.mkdir("logs")
             # size limit 10k, number limit 10
             file_handler = RotatingFileHandler(
