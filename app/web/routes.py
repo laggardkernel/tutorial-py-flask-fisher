@@ -95,9 +95,13 @@ def index():
 @login_required
 def my_gifts():
     id_ = current_user.id
+    # books offered by me, 返回的gift只是存储了isbn
     gifts = Gift.get_user_gifts(id_)
     isbn_list = [gift.isbn for gift in gifts]
+    # how many want the book
     count_list = Gift.get_wish_counts(isbn_list)
+    # 由于数据库 in 查询输入与输出没有严格对应关系，在 MyTransactions 中需要将
+    # gifts 与 count_list 中isbn对应
     view_model = MyTransactions(gifts, count_list)
     return render_template("my_gifts.html", gifts=view_model.transactions)
 
@@ -123,6 +127,7 @@ def my_wishes():
     id_ = current_user.id
     wishes = Wish.get_user_wishes(id_)
     isbn_list = [_.isbn for _ in wishes]
+    # how many people want for each book in the isbn list
     count_list = Wish.get_gift_counts(isbn_list)
     # reuse MyTransactions as MyWishes view model
     view_model = MyTransactions(wishes, count_list)
@@ -131,6 +136,7 @@ def my_wishes():
 
 @web.route("/wish/book/<isbn>")
 def save_to_wish(isbn):
+    # 判断书籍isbn是否有效，同时防止用户钻洞子自己送书给自己
     if current_user.check_before_save_to_list(isbn=isbn):
         with db.auto_commit():
             wish = Wish(recipient=current_user._get_current_object(), isbn=isbn)
@@ -148,8 +154,8 @@ def request_float(id):
     if gift.do_own_gift(current_user.id):
         flash("请勿向自己所要书籍")
         return redirect(url_for("web.book_detail", isbn=gift.isbn))
+    # beans not enough, or not sending enough books
     if not current_user.can_request_float():
-        # beans not enough, or not sending enough books
         return render_template("float_error.html", beans=current_user.beans)
 
     form = FloatForm()
@@ -159,12 +165,15 @@ def request_float(id):
             float = Float()
             form.populate_obj(float)
 
+            # 拷贝当前用户、书籍信息，避免某些数据，
+            # 避免用户数据变动后不能正确反映此时信息
             float.gift_id = gift.id
             float.requester_id = current_user.id
             float.requester_name = current_user.name
             float.giver_id = gift.sender_id
             float.giver_name = gift.sender.name
 
+            # 通过BookViewModel处理数据，获得我们所需要的字段
             book = BookViewModel(gift.book)
             float.isbn = book.isbn
             float.book_title = book.title
@@ -182,6 +191,7 @@ def request_float(id):
                 gift=gift,
             )
         # TODO: redirect to float list page
+    # 给出书籍拥有者姓名、邮件信息，发送、接受图书数量，可以作为信誉指标展示
     context = {"giver": gift.sender.summary, "beans": current_user.beans, "form": form}
     return render_template("float_request.html", **context)
 
@@ -189,6 +199,7 @@ def request_float(id):
 @web.route("/transactions")
 @login_required
 def transactions():
+    # 展示当前用户正在发送或者正在请求的书籍信息
     floats = (
         Float.query.filter(
             (Float.requester_id == current_user.id)
@@ -206,9 +217,11 @@ def transactions():
 @web.route("/float/<int:id>/withdraw")
 @login_required
 def withdraw_float(id):
+    """撤销向对方索取书籍"""
     with db.auto_commit():
         item = Float.query.filter_by(request_id=current_user.id, id=id).first_or_404()
         item.status = FloatStatus.Withdrew
+        # 拿回自己的豆子
         current_user.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
     return redirect(url_for("web.transactions"))
 
@@ -216,6 +229,7 @@ def withdraw_float(id):
 @web.route("/float/<int:id>/refuse")
 @login_required
 def refuse_float(id):
+    """拒绝对方请求"""
     with db.auto_commit():
         item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
         item.status = FloatStatus.Refused
@@ -231,8 +245,11 @@ def mail_float(id):
         item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
         # TODO: accept
         item.status = FloatStatus.Finished
+        # 完整一次赠送，为赠送者加豆子
         current_user.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
         # update gift and wish status
+        # TODO: 将Gift，Wish对象与Float对象连接，避免此处查询。
+        # 但这又违背了交易历史为不可变对象的原则。有待考虑
         gift = Gift.query.get_or_404(item.gift_id)
         gift.given = True
         Wish.query.filter_by(
@@ -267,6 +284,8 @@ def withdraw_wish(isbn):
 
 @web.route("/wish/<id>/fullfill")
 def fullfill_wish(id):
+    # 与float交易对应，float交易为索要者主动请求，此处为拥有者主动赠送
+    # 实际仍需要索要者填写表单，生成Float交易
     wish = Wish.query.get_or_404(id)
     gift = Gift.query.filter_by(
         sender_id=current_user.id, isbn=wish.isbn, given=False
