@@ -67,11 +67,12 @@ def book_detail(isbn):
         ).first():
             in_wish_list = True
 
-    gifts_in_trade = Gift.query.filter_by(isbn=isbn, given=False).all()
-    wishes_in_trade = Wish.query.filter_by(isbn=isbn, fulfilled=False).all()
+    # Gift，Wish还没带有书籍信息，会进行隐式API查询
+    gifts_available = Gift.query.filter_by(isbn=isbn, given=False).all()
+    wishes_available = Wish.query.filter_by(isbn=isbn, fulfilled=False).all()
 
-    gifts_transactions = Transaction(gifts_in_trade, user_ref="sender")
-    wish_transactions = Transaction(wishes_in_trade, user_ref="recipient")
+    gifts_transactions = Transaction(gifts_available, user_ref="sender")
+    wish_transactions = Transaction(wishes_available, user_ref="recipient")
 
     return render_template(
         "book_detail.html",
@@ -173,13 +174,13 @@ def request_float(id):
             current_user.beans -= current_app.config["BEANS_REQUEST_PER_BOOK"]
 
             db.session.add(float)
-        send_mail(
-            gift.sender.email,
-            "书籍索取请求",
-            "email/request_gift",
-            requester=current_user,
-            gift=gift,
-        )
+            send_mail(
+                gift.sender.email,
+                "书籍索取请求",
+                "email/request_gift",
+                requester=current_user,
+                gift=gift,
+            )
         # TODO: redirect to float list page
     context = {"giver": gift.sender.summary, "beans": current_user.beans, "form": form}
     return render_template("float_request.html", **context)
@@ -196,7 +197,7 @@ def transactions():
         .order_by(Float.created_time.desc())
         .all()
     )
-    data = None
+    data = []
     if floats:
         data = FloatCollection(floats, current_user.id).data
     return render_template("transactions.html", floats=data)
@@ -218,7 +219,8 @@ def refuse_float(id):
     with db.auto_commit():
         item = Float.query.filter_by(giver_id=current_user.id, id=id).first_or_404()
         item.status = FloatStatus.Refused
-        current_user.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
+        # 把对方预付的豆子从系统中退还
+        item.requester.beans += current_app.config["BEANS_REQUEST_PER_BOOK"]
     return redirect(url_for("web.transactions"))
 
 
