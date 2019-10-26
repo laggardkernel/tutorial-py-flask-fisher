@@ -13,6 +13,8 @@ flask-login = "*"
 pymysql = {extras = ["rsa"],version = "*"}
 flask-mail = "*"
 flask-wtf = "*"
+gunicorn = "*"
+flask-caching = "*"
 
 [dev-packages]
 httpie = "*"

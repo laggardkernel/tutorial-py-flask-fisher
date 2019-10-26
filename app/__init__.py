@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy, BaseQuery
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_caching import Cache
 from config import config
 
 
@@ -39,6 +40,7 @@ login_manager.login_view = "auth.login"
 login_manager.login_message = "请先登录"
 login_manager.login_message_category = "info"
 mail = Mail()
+cache = Cache()
 
 
 def create_app(config_name="default"):
@@ -49,6 +51,7 @@ def create_app(config_name="default"):
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    cache.init_app(app)
 
     from app.web import web as web_bp
     from app.auth import auth as auth_bp

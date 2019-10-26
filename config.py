@@ -33,6 +33,10 @@ class Config(object):
     FISHER_MAIL_SUBJECT_PREFIX = "[Fisher]"
     FISHER_MAIL_SENDER = "Fisher Admin <%s>" % MAIL_USERNAME
 
+    # flask-cache
+    CACHE_TYPE = os.environ.get("CACHE_TYPE", "simple")
+    CACHE_DEFAULT_TIMEOUT = int(os.environ.get("CACHE_DEFAULT_TIMEOUT", "3600"))
+
     # log into stdout for heroku
     LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")
 

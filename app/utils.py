@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import requests
 from flask import current_app
+from app import cache
 
 
 def is_isbn_or_key(word):
@@ -33,6 +34,7 @@ class YuShuBook:
         self.total = 0
         self.books = []
 
+    @cache.memoize(60 * 60 * 24 * 7)
     def search_by_isbn(self, isbn):
         url = self.isbn_url.format(isbn)
         r = HTTP.get(url)
@@ -51,6 +53,7 @@ class YuShuBook:
                 self.total = data["total"]
                 self.books = data["books"]
 
+    @cache.memoize(60 * 60)
     def search_by_keyword(self, q, page=1):
         url = self.keyword_url.format(
             q, current_app.config["RESULTS_PER_PAGE"], self.calc_start(page)
