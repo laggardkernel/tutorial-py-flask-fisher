@@ -6,6 +6,7 @@ from app.models import FloatStatus
 
 class BookViewModel(object):
     def __init__(self, book):
+        # filter the keys we don't wanna
         self.title = book["title"]
         self.publisher = book["publisher"]
         self.pages = book["pages"] or ""  # or .get("page", "")
@@ -37,7 +38,10 @@ class BookCollection(object):
         self.books = [BookViewModel(book) for book in yushu_book.books]
 
 
+# Note: Transaction 并非真正交易，只是用于给书籍详情页面下显示当前想要此书，以及用于闲置此书的人
+#   MyTransactions, FloatCollection 才是真正交易
 class Transaction(object):
+    # TODO: 这里起名有些问题，有时间再改
     def __init__(self, goods, user_ref="sender"):
         self.total = 0
         self.transactions = []
@@ -59,11 +63,13 @@ class MyTransactions(object):
     def __init__(self, gift_list, count_list):
         self.transactions = []
         self.__transaction_list = gift_list
+        # [{"isbn": value, "count": value}, {}, {}]
         self.__count_list = count_list
         self.__parse()
 
     def __parse(self):
         for gift in self.__transaction_list:
+            # in 查询返回无需，通过isbn对应gift对象与count数量
             my_gift = self.__match_count(gift)
             self.transactions.append(my_gift)
 
@@ -73,13 +79,14 @@ class MyTransactions(object):
             if gift.isbn == _["isbn"]:
                 count = _["count"]
                 break
+        # gift.book 实际为property装饰的函数，依次向API查询获取图书信息
         r = {"id": gift.id, "book": BookViewModel(gift.book), "count": count}
         return r
 
 
 class FloatCollection(object):
     def __init__(self, floats, user_id):
-        self.data = []
+        self.data = []  # 字典的列表
         self.__parse(floats, user_id)
 
     def __parse(self, floats, user_id):
@@ -102,6 +109,8 @@ class FloatModel(object):
         return identity
 
     def __parse(self, float, user_id):
+        # 不同于 Gift.book，Float 实例已经记录了真正的图书信息
+        # 此处数据整理时没有隐式向API发起请求。
         identity = self.requester_or_giver(float, user_id)
         status_str = FloatStatus.status_str(float.status, identity)
         r = {

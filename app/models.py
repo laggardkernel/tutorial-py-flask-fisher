@@ -115,6 +115,8 @@ class Gift(Base):
 
     @property
     def book(self):
+        # 每次查询，不是很经济，
+        # 为以后做缓存、存储坐准备，此处声明为 property
         yushu_book = YuShuBook()
         yushu_book.search_by_isbn(self.isbn)
         # return raw data, view model
@@ -158,6 +160,7 @@ class Gift(Base):
             .all()
         )
         # return dict to embed description for each item
+        # 这里只给出isbn与数量对应关系，简化查询，isbn信息转化为书籍对象在视图中完成
         count_list = [{"isbn": _[0], "count": _[1]} for _ in count_list]
         return count_list
 
@@ -243,6 +246,7 @@ class User(Base, UserMixin):
         if is_isbn_or_key(isbn) != "isbn":
             return False
         # check existence of the book
+        # 这里也不是很经济，每次入库前都要请求一次接口判断isbn是否有效
         yushu_book = YuShuBook()
         yushu_book.search_by_isbn(isbn)
         if not yushu_book.first:

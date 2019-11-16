@@ -76,7 +76,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL"
-    ) or "sqlite:///" + os.path.join(base_dir, "datat.sqlite")
+    ) or "sqlite:///" + os.path.join(base_dir, "data.sqlite")
 
     # TODO: move logging here?
 
