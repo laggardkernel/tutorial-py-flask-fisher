@@ -67,7 +67,8 @@ def book_detail(isbn):
         ).first():
             in_wish_list = True
 
-    # Gift，Wish还没带有书籍信息，会进行隐式API查询
+    # TODO: Gift，Wish还没带有书籍信息，会进行隐式API查询
+    # sender, recipient 关系 backref 默认为 select，无疑增加了数据库查询
     gifts_available = Gift.query.filter_by(isbn=isbn, given=False).all()
     wishes_available = Wish.query.filter_by(isbn=isbn, fulfilled=False).all()
 
@@ -147,10 +148,10 @@ def save_to_wish(isbn):
     return redirect(url_for(".book_detail", isbn=isbn))
 
 
-@web.route("/float/<int:id>", methods=["GET", "POST"])
+@web.route("/float/<int:gift_id>", methods=["GET", "POST"])
 @login_required
-def request_float(id):
-    gift = Gift.query.get_or_404(id)
+def request_float(gift_id):
+    gift = Gift.query.get_or_404(gift_id)
     if gift.do_own_gift(current_user.id):
         flash("请勿向自己所要书籍")
         return redirect(url_for("web.book_detail", isbn=gift.isbn))
@@ -282,8 +283,8 @@ def withdraw_wish(isbn):
     return redirect(url_for("web.my_wishes"))
 
 
-@web.route("/wish/<id>/fullfill")
-def fullfill_wish(id):
+@web.route("/wish/<id>/fulfill")
+def fulfill_wish(id):
     # 与float交易对应，float交易为索要者主动请求，此处为拥有者主动赠送
     # 实际仍需要索要者填写表单，生成Float交易
     wish = Wish.query.get_or_404(id)
@@ -294,7 +295,7 @@ def fullfill_wish(id):
         flash("您还未上传书籍！")
     else:
         send_mail(
-            wish.recipient.email, "书籍赠送提醒", "email/fullfill_wish", wish=wish, gift=gift
+            wish.recipient.email, "书籍赠送提醒", "email/fulfill_wish", wish=wish, gift=gift
         )
         flash("赠送请求邮件已经发送")
     return redirect(url_for("web.book_detail", isbn=wish.isbn))

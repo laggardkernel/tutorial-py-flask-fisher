@@ -90,6 +90,8 @@ class Wish(Base):
         :param isbn_list:
         :return: number of wishes corresponding to item in list
         """
+        if not isinstance(isbn_list, (str, set)):
+            isbn_list = [isbn_list]
         count_list = (
             db.session.query(Gift.isbn, func.count(Gift.id))
             .filter(Gift.given == False, Gift.isbn.in_(isbn_list), Gift.is_deleted == 0)

@@ -12,7 +12,7 @@ def is_isbn_or_key(word):
     if len(word) == 13 and word.isdigit():
         isbn_or_key = "isbn"
     short_word = word.replace("-", "")
-    if "-" in word and len(short_word) == 10 and short_word.isdigit:
+    if "-" in word and len(short_word) == 10 and short_word.isdigit():
         isbn_or_key = "isbn"
     return isbn_or_key
 
@@ -48,10 +48,9 @@ class YuShuBook:
 
     def __fill_collection(self, data):
         if data:
-            if data:
-                # don't forget the pagination
-                self.total = data["total"]
-                self.books = data["books"]
+            # don't forget the pagination
+            self.total = data["total"]
+            self.books = data["books"]
 
     @cache.memoize(60 * 60)
     def search_by_keyword(self, q, page=1):
