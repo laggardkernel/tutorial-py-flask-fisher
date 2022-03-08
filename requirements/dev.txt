@@ -6,7 +6,7 @@ click==7.0
 decorator==4.4.1
 flask-shell-ipython==0.4.1
 flask==1.1.1
-httpie==1.0.3
+httpie==3.1.0
 idna==2.8
 ipython-genutils==0.2.0
 ipython==7.9.0
