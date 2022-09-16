@@ -16,7 +16,7 @@ gunicorn==20.0.3
 idna==2.8
 itsdangerous==1.1.0
 jinja2==2.10.3
-mako==1.1.0
+mako==1.2.2
 markupsafe==1.1.1
 pycparser==2.19
 pymysql[rsa]==0.9.3
